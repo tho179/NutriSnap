@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="28dp"
+    app:cardElevation="8dp"
+    android:layout_gravity="center"
+    android:layout_margin="20dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <ImageView
+            android:id="@+id/btn_close_dialog"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_close_red"
+            android:contentDescription="Close"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <LinearLayout
+            android:id="@+id/layout_title_dialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_drink_water"
+                android:contentDescription="Drink Water Icon" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Drink water"
+                android:textColor="#4FC3F7"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/edt_water_amount"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_below="@id/layout_title_dialog"
+            android:layout_marginTop="25dp"
+            android:background="@drawable/bg_outline_green"
+            android:gravity="center"
+            android:inputType="number"
+            android:hint="ml"
+            android:textColorHint="#BDBDBD"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="10dp"
+            android:ems="10"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edt_water_amount"
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/btn_cancel_dialog"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="10dp"
+                android:backgroundTint="#E8F5E9"
+                android:text="Cancel"
+                android:textAllCaps="false"
+                android:textColor="#4CAF50"
+                app:cornerRadius="20dp" />
+
+            <Button
+                android:id="@+id/btn_drink_dialog"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#4CAF50"
+                android:text="Drink"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                app:cornerRadius="20dp" />
+        </LinearLayout>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

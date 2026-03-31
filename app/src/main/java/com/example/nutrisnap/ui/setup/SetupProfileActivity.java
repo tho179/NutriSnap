@@ -2,6 +2,7 @@ package com.example.nutrisnap.ui.setup;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,8 +15,9 @@ import com.example.nutrisnap.R;
 public class SetupProfileActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
+    private AppCompatButton btnContinue;
     private int currentStep = 1;
-    private final int TOTAL_STEPS = 6; // Đã thêm fragment_goal
+    private final int TOTAL_STEPS = 6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +25,7 @@ public class SetupProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_setup_profile);
 
         progressBar = findViewById(R.id.setup_progress_bar);
-        AppCompatButton btnContinue = findViewById(R.id.btn_setup_continue);
+        btnContinue = findViewById(R.id.btn_setup_continue);
         ImageButton btnBack = findViewById(R.id.btn_back_setup);
 
         if (savedInstanceState == null) {
@@ -51,6 +53,14 @@ public class SetupProfileActivity extends AppCompatActivity {
     private void updateStep(int step) {
         currentStep = step;
         progressBar.setProgress((currentStep * 100) / TOTAL_STEPS);
+
+        // Ẩn nút Continue ở Activity khi đến GoalFragment (Step 6)
+        // Vì GoalFragment đã có nút Continue riêng hoặc sẽ xử lý logic chuyển màn hình
+        if (currentStep == TOTAL_STEPS) {
+            btnContinue.setVisibility(View.GONE);
+        } else {
+            btnContinue.setVisibility(View.VISIBLE);
+        }
 
         Fragment fragment;
         switch (step) {

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F2F2F2"
+    android:orientation="vertical">
+
+    <!-- Toolbar -->
+    <RelativeLayout
+        android:id="@+id/toolbar_analysis"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@color/primary_green"
+        android:paddingTop="30dp"
+        android:paddingHorizontal="20dp">
+
+        <ImageView
+            android:id="@+id/btn_back_analysis"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Analysis"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <!-- Main Content Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginTop="-20dp"
+        android:layout_marginBottom="20dp"
+        app:cardCornerRadius="35dp"
+        app:cardElevation="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Food Image -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp">
+                <ImageView
+                    android:id="@+id/img_food_analysis"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/img_salad" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Food Name -->
+            <TextView
+                android:id="@+id/tv_food_name_analysis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="Dimsum"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- Chart Section -->
+            <RelativeLayout
+                android:layout_width="180dp"
+                android:layout_height="180dp"
+                android:layout_marginTop="10dp">
+
+                <com.example.nutrisnap.ui.home.NutriChartView
+                    android:id="@+id/nutri_chart_analysis"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tv_kcal_analysis"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="150"
+                        android:textColor="@color/black"
+                        android:textSize="36sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="kcal"
+                        android:textColor="#9E9E9E"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!-- Summary Labels -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+                <TextView android:id="@+id/tv_carbs_summary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="● Carbs-6g" android:textColor="#FF5252" android:textSize="12sp" android:textStyle="bold" android:layout_marginEnd="12dp"/>
+                <TextView android:id="@+id/tv_protein_summary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="● Protein-10g" android:textColor="#FF9800" android:textSize="12sp" android:textStyle="bold" android:layout_marginEnd="12dp"/>
+                <TextView android:id="@+id/tv_fat_summary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="● Fat-4g" android:textColor="#03A9F4" android:textSize="12sp" android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- Detailed Grid -->
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:columnCount="2"
+                android:paddingHorizontal="10dp">
+                <TextView android:id="@+id/tv_detail_carbs" android:layout_columnWeight="1" android:text="Carbohydrate: 6-7 g" android:textColor="#757575" android:textSize="12sp" android:layout_marginBottom="10dp"/>
+                <TextView android:id="@+id/tv_detail_sodium" android:layout_columnWeight="1" android:text="Sodium: 400-700 mg" android:textColor="#757575" android:textSize="12sp" android:layout_marginBottom="10dp"/>
+                <TextView android:id="@+id/tv_detail_fiber" android:layout_columnWeight="1" android:text="Dietary Fiber: 1-2 g" android:textColor="#757575" android:textSize="12sp" />
+                <TextView android:id="@+id/tv_detail_cholesterol" android:layout_columnWeight="1" android:text="Cholesterol: Mod level" android:textColor="#757575" android:textSize="12sp" />
+            </GridLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Bottom Controls -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:paddingHorizontal="30dp"
+        android:paddingVertical="20dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="15dp">
+            <ImageView
+                android:id="@+id/btn_minus_analysis"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/ic_minus_circle" />
+            <TextView
+                android:id="@+id/tv_quantity_analysis"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="@color/black"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/btn_plus_analysis"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/ic_plus_circle" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_add_to_meal"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:backgroundTint="@color/primary_green"
+            android:text="Add"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:cornerRadius="28dp" />
+    </LinearLayout>
+
+</LinearLayout>

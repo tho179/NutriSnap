@@ -59,20 +59,35 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
                     <ImageView
-                        android:layout_width="14dp" android:layout_height="14dp"
+                        android:id="@+id/img_prev_date"
+                        android:layout_width="24dp" android:layout_height="24dp"
+                        android:padding="5dp"
                         android:rotation="180" android:src="@drawable/ic_arrow_right"
-                        app:tint="#333333" />
+                        app:tint="#333333"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
                     <TextView
+                        android:id="@+id/tv_home_date"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:layout_marginHorizontal="12dp" android:text="Today, Sep 19"
                         android:textColor="#000000" android:textStyle="bold" />
                     <ImageView
+                        android:id="@+id/img_calendar_picker"
                         android:layout_width="20dp" android:layout_height="20dp"
-                        android:src="@drawable/ic_calendar" app:tint="@color/primary_green" />
+                        android:src="@drawable/ic_calendar" app:tint="@color/primary_green"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
                     <ImageView
-                        android:layout_width="14dp" android:layout_height="14dp"
+                        android:id="@+id/img_next_date"
+                        android:layout_width="24dp" android:layout_height="24dp"
+                        android:padding="5dp"
                         android:layout_marginStart="12dp" android:src="@drawable/ic_arrow_right"
-                        app:tint="#333333" />
+                        app:tint="#333333"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
                 </LinearLayout>
 
                 <RelativeLayout
@@ -81,11 +96,12 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="20dp">
                     <ProgressBar
+                        android:id="@+id/progress_main_kcal"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_width="match_parent" android:layout_height="match_parent"
                         android:progress="75" android:progressDrawable="@drawable/bg_circular_main" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1648" android:textColor="#000000" android:textSize="32sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tv_main_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1648" android:textColor="#000000" android:textSize="32sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="kcal left" android:textColor="#9E9E9E" android:textSize="12sp" />
                     </LinearLayout>
                 </RelativeLayout>
@@ -127,14 +143,23 @@
                 <RelativeLayout
                     android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="15dp">
                     <RelativeLayout android:id="@+id/water_chart_parent" android:layout_width="90dp" android:layout_height="90dp" android:layout_centerHorizontal="true">
-                        <ProgressBar style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="match_parent" android:progress="60" android:progressDrawable="@drawable/bg_circular_blue" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="1200\n/2000ml" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/black"/>
+                        <ProgressBar
+                            android:id="@+id/progress_water"
+                            style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="match_parent"
+                            android:progress="60" android:progressDrawable="@drawable/bg_circular_blue" />
+                        <TextView
+                            android:id="@+id/tv_water_progress"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="1200\n/2000ml" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/black"/>
                     </RelativeLayout>
                     <ImageView
-                        android:layout_width="16dp" android:layout_height="16dp"
-                        android:layout_centerVertical="true" android:layout_marginStart="15dp"
+                        android:id="@+id/btn_add_water"
+                        android:layout_width="32dp" android:layout_height="32dp"
+                        android:layout_centerVertical="true" android:layout_marginStart="20dp"
                         android:layout_toEndOf="@id/water_chart_parent"
-                        android:src="@drawable/ic_add_circle" app:tint="#2196F3" />
+                        android:src="@drawable/ic_add_circle" app:tint="#2196F3"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless"/>
                 </RelativeLayout>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="5dp" android:text="Water" android:textColor="@color/black" android:textStyle="bold" />
             </LinearLayout>
@@ -154,7 +179,15 @@
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:padding="15dp">
 
-                <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp">
+                <!-- Breakfast Layout -->
+                <RelativeLayout
+                    android:id="@+id/layout_breakfast"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
                     <ImageView android:id="@+id/img_br" android:layout_width="55dp" android:layout_height="55dp" android:src="@drawable/img_breakfast" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_br" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Breakfast" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
@@ -168,7 +201,15 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F2F2F2" />
 
-                <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp">
+                <!-- Lunch Layout -->
+                <RelativeLayout
+                    android:id="@+id/layout_lunch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
                     <ImageView android:id="@+id/img_ln" android:layout_width="55dp" android:layout_height="55dp" android:src="@drawable/img_lunch" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_ln" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lunch" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
@@ -182,7 +223,15 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F2F2F2" />
 
-                <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp">
+                <!-- Dinner Layout -->
+                <RelativeLayout
+                    android:id="@+id/layout_dinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
                     <ImageView android:id="@+id/img_dn" android:layout_width="55dp" android:layout_height="55dp" android:src="@drawable/img_dinner" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_dn" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dinner" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
@@ -191,12 +240,20 @@
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
-                    <ImageView android:layout_width="28dp" android:layout_height="28dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_add_circle" app:tint="@color/primary_green" />
+                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />
                 </RelativeLayout>
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F2F2F2" />
 
-                <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="12dp">
+                <!-- Snacks Layout -->
+                <RelativeLayout
+                    android:id="@+id/layout_snacks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
                     <ImageView android:id="@+id/img_sn" android:layout_width="55dp" android:layout_height="55dp" android:src="@drawable/img_snack" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_sn" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Snacks" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
@@ -205,7 +262,7 @@
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
-                    <ImageView android:layout_width="28dp" android:layout_height="28dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_add_circle" app:tint="@color/primary_green" />
+                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />
                 </RelativeLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>

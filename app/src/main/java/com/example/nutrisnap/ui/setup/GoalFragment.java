@@ -1,13 +1,17 @@
 package com.example.nutrisnap.ui.setup;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
+import com.example.nutrisnap.MainActivity;
 import com.example.nutrisnap.R;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +41,20 @@ public class GoalFragment extends Fragment {
             final int index = i;
             options.get(i).setOnClickListener(v -> selectGoal(index));
         }
+
+        AppCompatButton btnContinue = view.findViewById(R.id.btn_continue);
+        btnContinue.setOnClickListener(v -> {
+            if (selectedIndex != -1) {
+                // Chuyển đến MainActivity (Home)
+                Intent intent = new Intent(getActivity(), MainActivity.class);
+                startActivity(intent);
+                if (getActivity() != null) {
+                    getActivity().finish();
+                }
+            } else {
+                Toast.makeText(getContext(), "Please select a goal first", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         return view;
     }
