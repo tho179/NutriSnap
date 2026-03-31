@@ -1,3 +1,26 @@
 <resources>
     <string name="app_name">NutriSnap</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_chatbot">Chatbot</string>
+    <string name="nav_insights">Insights</string>
+    <string name="nav_profile">Profile</string>
+    <string name="home">Home</string>
+    <string name="chatbot">Chatbot</string>
+    <string name="profile">Profile</string>
+    <string name="insights">Insights</string>
+    <string name="kcal_left">kcal left</string>
+    <string name="_1648">1648</string>
+    <string name="eaten">Eaten</string>
+    <string name="_168_n_224g">168\n/224g</string>
+    <string name="today_sep_19">Today, Sep 19</string>
+    <string name="nutrisnap">NutriSnap</string>
+    <string name="carbs">Carbs</string>
+    <string name="_83_n_128g">83\n/128g</string>
+    <string name="_70_n_128g">70\n/128g</string>
+    <string name="fat">Fat</string>
+    <string name="protein">Protein</string>
+    <string name="water">Water</string>
+    <string name="meals">Meals</string>
+    <string name="_1200_n_2000ml">1200\n/2000ml</string>
+    <string name="drink">Drink</string>
 </resources>

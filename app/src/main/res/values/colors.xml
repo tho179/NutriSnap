@@ -2,4 +2,21 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="primary_green">#38C968</color>
+    <color name="primary_green_light">#85E0A3</color>
+    <color name="primary_green_dark">#2E9E52</color>
+
+    <color name="bg_app">#F4F6F8</color>
+    <color name="bg_card">#FFFFFF</color>
+
+    <color name="macro_carbs">#FF4B4B</color>
+    <color name="macro_protein">#FF9800</color>
+    <color name="macro_fat">#1DB0F6</color>
+
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#BDBDBD</color>
+    <color name="main_green">#4CAF50</color>
+    <color name="nav_unselected">#A0A0A0</color>
 </resources>

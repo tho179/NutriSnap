@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="24dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:text="Enter OTP Code?"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Description -->
+    <TextView
+        android:id="@+id/tv_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="We've sent a 4-digit OTP code to your email address. Please enter it below to verify and continue with password reset."
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+    <!-- OTP Input Boxes -->
+    <LinearLayout
+        android:id="@+id/layout_otp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_description">
+
+        <TextView
+            android:id="@+id/tv_otp_1"
+            style="@style/OtpBoxStyle" />
+
+        <TextView
+            android:id="@+id/tv_otp_2"
+            style="@style/OtpBoxStyle" />
+
+        <TextView
+            android:id="@+id/tv_otp_3"
+            style="@style/OtpBoxStyle" />
+
+        <TextView
+            android:id="@+id/tv_otp_4"
+            style="@style/OtpBoxStyle" />
+    </LinearLayout>
+
+    <!-- Resend Timer -->
+
+    <!-- Custom Numeric Keyboard -->
+    <TextView
+        android:id="@+id/tv_resend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:text="You can resend the code in 56 seconds\nResend code"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_otp" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:columnCount="3"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Row 1 -->
+        <TextView style="@style/OtpKeyStyle" android:text="1" />
+        <TextView style="@style/OtpKeyStyle" android:text="2" />
+        <TextView style="@style/OtpKeyStyle" android:text="3" />
+
+        <!-- Row 2 -->
+        <TextView style="@style/OtpKeyStyle" android:text="4" />
+        <TextView style="@style/OtpKeyStyle" android:text="5" />
+        <TextView style="@style/OtpKeyStyle" android:text="6" />
+
+        <!-- Row 3 -->
+        <TextView style="@style/OtpKeyStyle" android:text="7" />
+        <TextView style="@style/OtpKeyStyle" android:text="8" />
+        <TextView style="@style/OtpKeyStyle" android:text="9" />
+
+        <!-- Row 4 -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:layout_columnWeight="1">
+            <ImageView
+                android:id="@+id/btn_delete"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_circle_gray"
+                android:padding="16dp"
+                android:src="@drawable/ic_backspace" />
+        </FrameLayout>
+
+        <TextView style="@style/OtpKeyStyle" android:text="0" />
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:layout_columnWeight="1">
+            <ImageView
+                android:id="@+id/btn_verify"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_circle_green"
+                android:padding="16dp"
+                android:src="@drawable/ic_arrow_fima" />
+        </FrameLayout>
+
+    </GridLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

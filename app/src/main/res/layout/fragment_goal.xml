@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/white"
+    android:gravity="center_horizontal">
+
+    <ImageView
+        android:id="@+id/img_main_goal"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/ic_goal"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Choose your goal"
+        android:textColor="#4CAF50"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:orientation="vertical">
+
+        <!-- Lose Weight -->
+        <LinearLayout
+            android:id="@+id/btn_lose_weight"
+            style="@style/GoalOptionStyle">
+            <ImageView
+                style="@style/GoalIconStyle"
+                android:src="@drawable/ic_goal_lose_weight" />
+            <TextView
+                style="@style/GoalTextStyle"
+                android:text="Lose Weight" />
+            <ImageView
+                android:id="@+id/iv_check_lose_weight"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_check_green"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Gain Muscle -->
+        <LinearLayout
+            android:id="@+id/btn_gain_muscle"
+            style="@style/GoalOptionStyle"
+            android:layout_marginTop="12dp">
+            <ImageView
+                style="@style/GoalIconStyle"
+                android:src="@drawable/ic_goal_gain_muscle" />
+            <TextView
+                style="@style/GoalTextStyle"
+                android:text="Gain Muscle" />
+            <ImageView
+                android:id="@+id/iv_check_gain_muscle"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_check_green"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Improve Health -->
+        <LinearLayout
+            android:id="@+id/btn_improve_health"
+            style="@style/GoalOptionStyle"
+            android:layout_marginTop="12dp">
+            <ImageView
+                style="@style/GoalIconStyle"
+                android:src="@drawable/ic_goal_improve_health" />
+            <TextView
+                style="@style/GoalTextStyle"
+                android:text="Improve Health" />
+            <ImageView
+                android:id="@+id/iv_check_improve_health"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_check_green"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Clear skin -->
+        <LinearLayout
+            android:id="@+id/btn_clear_skin"
+            style="@style/GoalOptionStyle"
+            android:layout_marginTop="12dp">
+            <ImageView
+                style="@style/GoalIconStyle"
+                android:src="@drawable/ic_goal_clear_skin" />
+            <TextView
+                style="@style/GoalTextStyle"
+                android:text="Clear skin" />
+            <ImageView
+                android:id="@+id/iv_check_clear_skin"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_check_green"
+                android:visibility="gone" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
