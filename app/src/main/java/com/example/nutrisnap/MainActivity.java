@@ -18,6 +18,9 @@ import com.example.nutrisnap.ui.home.LunchFragment;
 import com.example.nutrisnap.ui.home.DinnerFragment;
 import com.example.nutrisnap.ui.home.SnacksFragment;
 import com.example.nutrisnap.ui.home.AnalysisFragment;
+import com.example.nutrisnap.ui.chatbot.ChatbotFragment;
+import com.example.nutrisnap.ui.report.InsightsFragment;
+import com.example.nutrisnap.ui.profile.ProfileFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNav = findViewById(R.id.bottom_navigation);
 
-        // Hiển thị HomeFragment mặc định
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new HomeFragment())
@@ -51,27 +53,34 @@ public class MainActivity extends AppCompatActivity {
             if (id == R.id.nav_home) {
                 selectedFragment = new HomeFragment();
             } else if (id == R.id.nav_chatbot) {
-                // selectedFragment = new ChatbotFragment();
+                selectedFragment = new ChatbotFragment();
             } else if (id == R.id.nav_insights) {
-                // selectedFragment = new InsightsFragment();
+                selectedFragment = new InsightsFragment();
             } else if (id == R.id.nav_profile) {
-                // selectedFragment = new ProfileFragment();
+                selectedFragment = new ProfileFragment();
             }
 
             if (selectedFragment != null) {
+                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, selectedFragment)
                         .commit();
+                updateBottomNavVisibility(selectedFragment);
                 return true;
             }
             return false;
         });
 
-        // Lắng nghe thay đổi BackStack để ẩn/hiện BottomNav
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
             updateBottomNavVisibility(currentFragment);
         });
+    }
+
+    public void navigateToHome() {
+        if (bottomNav != null) {
+            bottomNav.setSelectedItemId(R.id.nav_home);
+        }
     }
 
     private void updateBottomNavVisibility(Fragment fragment) {
@@ -79,17 +88,11 @@ public class MainActivity extends AppCompatActivity {
             fragment instanceof LunchFragment || 
             fragment instanceof DinnerFragment || 
             fragment instanceof SnacksFragment ||
-            fragment instanceof AnalysisFragment) {
+            fragment instanceof AnalysisFragment ||
+            fragment instanceof ChatbotFragment) {
             bottomNav.setVisibility(View.GONE);
         } else {
             bottomNav.setVisibility(View.VISIBLE);
-        }
-    }
-    
-    // Cập nhật visibility khi fragment được replace không qua backstack (nếu cần)
-    public void setBottomNavVisibility(int visibility) {
-        if (bottomNav != null) {
-            bottomNav.setVisibility(visibility);
         }
     }
 }

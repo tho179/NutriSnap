@@ -19,8 +19,8 @@
         android:layout_marginBottom="0dp"
         android:background="@color/white"
         app:elevation="16dp"
-        app:itemIconTint="@color/main_green"
-        app:itemTextColor="@color/main_green"
+        app:itemIconTint="@color/nav_item_color_state"
+        app:itemTextColor="@color/nav_item_color_state"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
 

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <RelativeLayout
+        android:id="@+id/header_target"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@color/primary_green"
+        android:paddingTop="30dp">
+
+        <ImageView
+            android:id="@+id/btn_back_target"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="20dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Target"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/btn_save_target"
+        android:layout_below="@id/header_target">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Target weight"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edt_target_weight"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_option_default"
+                android:hint="45 kg"
+                android:inputType="numberDecimal"
+                android:paddingHorizontal="15dp"
+                android:textColor="@color/black"
+                android:textColorHint="#CCCCCC"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="25dp"
+                android:background="#EEEEEE" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:orientation="vertical">
+
+                <!-- Lose Weight -->
+                <LinearLayout
+                    android:id="@+id/btn_target_lose_weight"
+                    style="@style/GoalOptionStyle">
+                    <ImageView
+                        style="@style/GoalIconStyle"
+                        android:src="@drawable/ic_goal_lose_weight" />
+                    <TextView
+                        style="@style/GoalTextStyle"
+                        android:text="Lose Weight" />
+                    <ImageView
+                        android:id="@+id/iv_check_target_lose_weight"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_check_green"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <!-- Gain Muscle -->
+                <LinearLayout
+                    android:id="@+id/btn_target_gain_muscle"
+                    style="@style/GoalOptionStyle"
+                    android:layout_marginTop="12dp">
+                    <ImageView
+                        style="@style/GoalIconStyle"
+                        android:src="@drawable/ic_goal_gain_muscle" />
+                    <TextView
+                        style="@style/GoalTextStyle"
+                        android:text="Gain Muscle" />
+                    <ImageView
+                        android:id="@+id/iv_check_target_gain_muscle"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_check_green"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <!-- Improve Health -->
+                <LinearLayout
+                    android:id="@+id/btn_target_improve_health"
+                    style="@style/GoalOptionStyle"
+                    android:layout_marginTop="12dp">
+                    <ImageView
+                        style="@style/GoalIconStyle"
+                        android:src="@drawable/ic_goal_improve_health" />
+                    <TextView
+                        style="@style/GoalTextStyle"
+                        android:text="Improve Health" />
+                    <ImageView
+                        android:id="@+id/iv_check_target_improve_health"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_check_green"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <!-- Clear skin -->
+                <LinearLayout
+                    android:id="@+id/btn_target_clear_skin"
+                    style="@style/GoalOptionStyle"
+                    android:layout_marginTop="12dp">
+                    <ImageView
+                        style="@style/GoalIconStyle"
+                        android:src="@drawable/ic_goal_clear_skin" />
+                    <TextView
+                        style="@style/GoalTextStyle"
+                        android:text="Clear skin" />
+                    <ImageView
+                        android:id="@+id/iv_check_target_clear_skin"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_check_green"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_save_target"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/bg_button_green"
+        android:text="Save"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>
