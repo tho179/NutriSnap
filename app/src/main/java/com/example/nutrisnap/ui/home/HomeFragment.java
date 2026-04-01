@@ -20,6 +20,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.nutrisnap.R;
+import com.example.nutrisnap.ui.notification.NotificationFragment;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -47,13 +48,13 @@ public class HomeFragment extends Fragment {
         ImageView imgPrevDate = view.findViewById(R.id.img_prev_date);
         ImageView imgNextDate = view.findViewById(R.id.img_next_date);
         ImageView btnAddWater = view.findViewById(R.id.btn_add_water);
+        ImageView btnNotification = view.findViewById(R.id.btn_notification);
         
         RelativeLayout layoutBreakfast = view.findViewById(R.id.layout_breakfast);
         RelativeLayout layoutLunch = view.findViewById(R.id.layout_lunch);
         RelativeLayout layoutDinner = view.findViewById(R.id.layout_dinner);
         RelativeLayout layoutSnacks = view.findViewById(R.id.layout_snacks);
 
-        // Hiển thị dữ liệu mặc định
         updateDateLabel();
         updateWaterUI();
 
@@ -71,7 +72,10 @@ public class HomeFragment extends Fragment {
 
         btnAddWater.setOnClickListener(v -> showDrinkWaterDialog());
 
-        // Chuyển sang các Fragment chi tiết
+        if (btnNotification != null) {
+            btnNotification.setOnClickListener(v -> navigateToFragment(new NotificationFragment()));
+        }
+
         layoutBreakfast.setOnClickListener(v -> navigateToFragment(new BreakfastFragment()));
         layoutLunch.setOnClickListener(v -> navigateToFragment(new LunchFragment()));
         layoutDinner.setOnClickListener(v -> navigateToFragment(new DinnerFragment()));

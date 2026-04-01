@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.view.MotionEvent;
 import android.widget.EditText;
+import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import com.example.nutrisnap.R;
@@ -19,18 +20,23 @@ public class ChangePasswordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
 
+        ImageView btnBack = findViewById(R.id.btn_back_change_password);
         EditText etNewPassword = findViewById(R.id.et_new_password);
         EditText etConfirmNewPassword = findViewById(R.id.et_confirm_new_password);
         AppCompatButton btnSave = findViewById(R.id.btn_save_password);
+
+        btnBack.setOnClickListener(v -> finish());
 
         // Toggle New Password Visibility
         etNewPassword.setOnTouchListener((v, event) -> {
             final int DRAWABLE_RIGHT = 2;
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                if (event.getRawX() >= (etNewPassword.getRight() - etNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width() - 50)) {
-                    isNewPasswordVisible = !isNewPasswordVisible;
-                    togglePasswordVisibility(etNewPassword, isNewPasswordVisible);
-                    return true;
+                if (etNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT] != null) {
+                    if (event.getRawX() >= (etNewPassword.getRight() - etNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width() - 50)) {
+                        isNewPasswordVisible = !isNewPasswordVisible;
+                        togglePasswordVisibility(etNewPassword, isNewPasswordVisible);
+                        return true;
+                    }
                 }
             }
             return false;
@@ -40,10 +46,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
         etConfirmNewPassword.setOnTouchListener((v, event) -> {
             final int DRAWABLE_RIGHT = 2;
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                if (event.getRawX() >= (etConfirmNewPassword.getRight() - etConfirmNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width() - 50)) {
-                    isConfirmPasswordVisible = !isConfirmPasswordVisible;
-                    togglePasswordVisibility(etConfirmNewPassword, isConfirmPasswordVisible);
-                    return true;
+                if (etConfirmNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT] != null) {
+                    if (event.getRawX() >= (etConfirmNewPassword.getRight() - etConfirmNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width() - 50)) {
+                        isConfirmPasswordVisible = !isConfirmPasswordVisible;
+                        togglePasswordVisibility(etConfirmNewPassword, isConfirmPasswordVisible);
+                        return true;
+                    }
                 }
             }
             return false;
