@@ -17,6 +17,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.nutrisnap.R;
+import com.example.nutrisnap.controller.DailyController;
+import com.example.nutrisnap.model.DailySummaryData;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -36,12 +38,14 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class InsightsFragment extends Fragment implements OnChartValueSelectedListener {
 
@@ -59,10 +63,16 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
     private String currentMode = "weekly";
     private float userWeight = 52.56f;
 
+    private DailyController dailyController;
+    private FirebaseAuth mAuth;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_insights, container, false);
+
+        dailyController = new DailyController();
+        mAuth = FirebaseAuth.getInstance();
 
         barChart = view.findViewById(R.id.bar_chart_calories);
         pieChart = view.findViewById(R.id.pie_chart_nutrients);
@@ -80,7 +90,6 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         setupNavigationListeners();
         
         btnUpdateWeight.setOnClickListener(v -> {
-            // Luôn cho phép cập nhật cân nặng cho "ngày hôm nay"
             showUpdateWeightDialog();
         });
         
@@ -165,7 +174,14 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
     }
 
     private void updateRangeTextAndCharts() {
+        String userId = mAuth.getUid();
+        if (userId == null) return;
+
         Calendar realToday = Calendar.getInstance();
+        SimpleDateFormat dbSdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        List<String> dateKeys = new ArrayList<>();
+        String[] labels = new String[7];
+
         if (currentMode.equals("weekly")) {
             Calendar start = (Calendar) currentCalendar.clone();
             start.setFirstDayOfWeek(Calendar.MONDAY);
@@ -176,19 +192,12 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
             SimpleDateFormat sdf = new SimpleDateFormat("MMM dd", Locale.US);
             tvInsightsRange.setText(sdf.format(start.getTime()) + " - " + sdf.format(end.getTime()) + ", " + currentCalendar.get(Calendar.YEAR));
             
-            String[] weekLabels = new String[7];
-            int todayIdx = -1;
             Calendar labelCal = (Calendar) start.clone();
             for (int i = 0; i < 7; i++) {
-                weekLabels[i] = String.valueOf(labelCal.get(Calendar.DAY_OF_MONTH));
-                if (labelCal.get(Calendar.YEAR) == realToday.get(Calendar.YEAR) && 
-                    labelCal.get(Calendar.DAY_OF_YEAR) == realToday.get(Calendar.DAY_OF_YEAR)) {
-                    todayIdx = i;
-                }
+                dateKeys.add(dbSdf.format(labelCal.getTime()));
+                labels[i] = String.valueOf(labelCal.get(Calendar.DAY_OF_MONTH));
                 labelCal.add(Calendar.DAY_OF_YEAR, 1);
             }
-            setupBarChart(7, weekLabels, todayIdx);
-            setupLineChart(7, weekLabels, todayIdx);
         } else if (currentMode.equals("monthly")) {
             Calendar end = (Calendar) currentCalendar.clone();
             Calendar start = (Calendar) end.clone();
@@ -197,37 +206,62 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
             SimpleDateFormat sdfRange = new SimpleDateFormat("MMM", Locale.US);
             tvInsightsRange.setText(sdfRange.format(start.getTime()) + " - " + sdfRange.format(end.getTime()) + ", " + end.get(Calendar.YEAR));
             
-            String[] monthLabels = new String[7];
-            int todayIdx = -1;
             Calendar labelCal = (Calendar) start.clone();
             for (int i = 0; i < 7; i++) {
-                monthLabels[i] = sdfRange.format(labelCal.getTime());
-                if (labelCal.get(Calendar.YEAR) == realToday.get(Calendar.YEAR) && 
-                    labelCal.get(Calendar.MONTH) == realToday.get(Calendar.MONTH)) {
-                    todayIdx = i;
-                }
+                // For simplicity, using 1st of each month as a key if we were to fetch monthly totals
+                // But daily_logs are daily. This logic might need refinement for true monthly aggregates.
+                dateKeys.add(dbSdf.format(labelCal.getTime()));
+                labels[i] = sdfRange.format(labelCal.getTime());
                 labelCal.add(Calendar.MONTH, 1);
             }
-            setupBarChart(7, monthLabels, todayIdx);
-            setupLineChart(7, monthLabels, todayIdx);
         } else {
             int endYear = currentCalendar.get(Calendar.YEAR);
             int startYear = endYear - 6;
             tvInsightsRange.setText(startYear + " - " + endYear);
             
-            String[] yearLabels = new String[7];
-            int todayIdx = -1;
             for (int i = 0; i < 7; i++) {
                 int year = startYear + i;
-                yearLabels[i] = String.valueOf(year);
-                if (year == realToday.get(Calendar.YEAR)) {
-                    todayIdx = i;
+                labels[i] = String.valueOf(year);
+                // Placeholder key
+                dateKeys.add(year + "-01-01");
+            }
+        }
+
+        dailyController.fetchRangeSummary(userId, dateKeys, new DailyController.DailyListCallback() {
+            @Override
+            public void onSuccess(Map<String, DailySummaryData> dataMap) {
+                if (!isAdded()) return;
+                
+                List<BarEntry> barEntries = new ArrayList<>();
+                float totalProtein = 0, totalCarbs = 0, totalFat = 0;
+                int countWithData = 0;
+
+                for (int i = 0; i < dateKeys.size(); i++) {
+                    DailySummaryData d = dataMap.get(dateKeys.get(i));
+                    float cal = (d != null) ? d.totalCaloriesIn : 0;
+                    barEntries.add(new BarEntry(i, cal));
+                    
+                    if (d != null && d.totalCaloriesIn > 0) {
+                        totalProtein += d.proteinEaten;
+                        totalCarbs += d.carbsEaten;
+                        totalFat += d.fatEaten;
+                        countWithData++;
+                    }
+                }
+                
+                updateBarChart(barEntries, labels);
+                updatePieChart(totalProtein, totalCarbs, totalFat);
+                // Weight chart remains simulated or could be linked to User weight history if available
+                setupLineChart(7, labels, -1);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
-            setupBarChart(7, yearLabels, todayIdx);
-            setupLineChart(7, yearLabels, todayIdx);
-        }
-        setupPieChart();
+        });
     }
 
     private void configureBarChart(String[] labels) {
@@ -260,6 +294,49 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         leftAxis.addLimitLine(limitLine);
     }
 
+    private void updateBarChart(List<BarEntry> entries, String[] labels) {
+        BarDataSet dataSet = new BarDataSet(entries, "Calories");
+        selectedBarIndex = entries.size() - 1; // Default to last day
+        updateBarColors(dataSet, entries.size());
+        dataSet.setDrawValues(true);
+        dataSet.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getBarLabel(BarEntry barEntry) {
+                return (int) barEntry.getX() == selectedBarIndex ? String.valueOf((int) barEntry.getY()) : "";
+            }
+        });
+        barChart.setData(new BarData(dataSet));
+        barChart.getData().setBarWidth(0.65f);
+        configureBarChart(labels);
+        barChart.animateY(800);
+        barChart.invalidate();
+    }
+
+    private void updatePieChart(float protein, float carbs, float fat) {
+        List<PieEntry> entries = new ArrayList<>();
+        if (protein == 0 && carbs == 0 && fat == 0) {
+            entries.add(new PieEntry(1f, "No Data"));
+            PieDataSet dataSet = new PieDataSet(entries, "");
+            dataSet.setColor(Color.LTGRAY);
+            dataSet.setDrawValues(false);
+            pieChart.setData(new PieData(dataSet));
+        } else {
+            entries.add(new PieEntry(protein, "Protein"));
+            entries.add(new PieEntry(carbs, "Carbs"));
+            entries.add(new PieEntry(fat, "Fat"));
+            PieDataSet dataSet = new PieDataSet(entries, "");
+            dataSet.setColors(new int[]{Color.parseColor("#FF9800"), Color.parseColor("#FF5252"), Color.parseColor("#03A9F4")});
+            dataSet.setSliceSpace(3f);
+            dataSet.setDrawValues(false);
+            pieChart.setData(new PieData(dataSet));
+        }
+        pieChart.setHoleRadius(65f);
+        pieChart.getDescription().setEnabled(false);
+        pieChart.getLegend().setEnabled(false);
+        pieChart.animateXY(800, 800);
+        pieChart.invalidate();
+    }
+
     private void configureLineChart(String[] labels) {
         lineChart.getDescription().setEnabled(false);
         lineChart.getLegend().setEnabled(false);
@@ -285,38 +362,10 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         lineChart.setExtraOffsets(10, 10, 10, 10);
     }
 
-    private void setupBarChart(int count, String[] labels, int todayIdx) {
-        List<BarEntry> entries = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            float val = (float) (Math.random() * 2000) + 1000;
-            entries.add(new BarEntry(i, val));
-        }
-        BarDataSet dataSet = new BarDataSet(entries, "Calories");
-        selectedBarIndex = (todayIdx != -1) ? todayIdx : count - 1;
-        updateBarColors(dataSet, count);
-        dataSet.setDrawValues(true);
-        dataSet.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getBarLabel(BarEntry barEntry) {
-                return (int) barEntry.getX() == selectedBarIndex ? String.valueOf((int) barEntry.getY()) : "";
-            }
-        });
-        barChart.setData(new BarData(dataSet));
-        barChart.getData().setBarWidth(0.65f);
-        configureBarChart(labels);
-        barChart.animateY(800);
-    }
-
     private void setupLineChart(int count, String[] labels, int todayIdx) {
         List<Entry> entries = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            float val;
-            if (i == todayIdx) {
-                val = userWeight;
-            } else {
-                // Simulated previous data or random for illustration
-                val = 52.0f + (float)(Math.random() * 2.0);
-            }
+            float val = userWeight + (float)(Math.random() * 1.0 - 0.5);
             entries.add(new Entry(i, val));
         }
 
@@ -332,7 +381,7 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         dataSet.setValueFormatter(new ValueFormatter() {
             @Override
             public String getPointLabel(Entry entry) {
-                return String.valueOf(entry.getY());
+                return String.format("%.1f", entry.getY());
             }
         });
         
@@ -365,19 +414,4 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
 
     @Override
     public void onNothingSelected() {}
-
-    private void setupPieChart() {
-        List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(50f, "Protein"));
-        entries.add(new PieEntry(30f, "Carbs"));
-        entries.add(new PieEntry(20f, "Fat"));
-        PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setColors(new int[]{Color.parseColor("#FF9800"), Color.parseColor("#FF5252"), Color.parseColor("#03A9F4")});
-        dataSet.setSliceSpace(3f);
-        dataSet.setDrawValues(false);
-        PieData pieData = new PieData(dataSet);
-        pieChart.setData(pieData);
-        pieChart.setHoleRadius(65f);
-        pieChart.animateXY(800, 800);
-    }
 }

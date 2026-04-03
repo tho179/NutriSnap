@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
@@ -19,13 +21,30 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.nutrisnap.R;
 import com.example.nutrisnap.auth.ChangePasswordActivity;
 import com.example.nutrisnap.auth.LoginActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileFragment extends Fragment {
+
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    
+    private TextView tvName, tvEmail, tvWeight, tvHeight;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        // Ánh xạ View
+        tvName = view.findViewById(R.id.tv_profile_name);
+        tvEmail = view.findViewById(R.id.tv_profile_email);
+        tvWeight = view.findViewById(R.id.tv_profile_weight);
+        tvHeight = view.findViewById(R.id.tv_profile_height);
 
         CardView cardProfileInfo = view.findViewById(R.id.card_profile_info);
         CardView btnLanguage = view.findViewById(R.id.btn_menu_language);
@@ -35,8 +54,10 @@ public class ProfileFragment extends Fragment {
         CardView btnPlan = view.findViewById(R.id.btn_menu_plan);
         Button btnLogout = view.findViewById(R.id.btn_log_out);
 
-        cardProfileInfo.setOnClickListener(v -> navigateToFragment(new EditProfileFragment()));
+        // Lấy dữ liệu từ Firebase
+        loadUserData();
 
+        cardProfileInfo.setOnClickListener(v -> navigateToFragment(new EditProfileFragment()));
         btnLanguage.setOnClickListener(v -> navigateToFragment(new LanguageFragment()));
         btnHelp.setOnClickListener(v -> navigateToFragment(new HelpFragment()));
         btnTarget.setOnClickListener(v -> navigateToFragment(new TargetFragment()));
@@ -47,11 +68,32 @@ public class ProfileFragment extends Fragment {
             startActivity(intent);
         });
 
-        btnLogout.setOnClickListener(v -> {
-            showLogoutDialog();
-        });
+        btnLogout.setOnClickListener(v -> showLogoutDialog());
 
         return view;
+    }
+
+    private void loadUserData() {
+        String userId = mAuth.getUid();
+        if (userId == null) return;
+
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    String name = documentSnapshot.getString("username");
+                    String email = documentSnapshot.getString("email");
+                    Double weight = documentSnapshot.getDouble("currentWeight");
+                    Double height = documentSnapshot.getDouble("currentHeight");
+
+                    tvName.setText(name != null ? name : "N/A");
+                    tvEmail.setText(email != null ? email : "N/A");
+                    tvWeight.setText("Weight: " + (weight != null ? weight : "--") + " kg");
+                    tvHeight.setText("Height: " + (height != null ? height : "--") + " cm");
+                }
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(getContext(), "Lỗi tải thông tin: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
     }
 
     private void showLogoutDialog() {
@@ -70,6 +112,7 @@ public class ProfileFragment extends Fragment {
         btnClose.setOnClickListener(v -> dialog.dismiss());
 
         btnConfirm.setOnClickListener(v -> {
+            mAuth.signOut();
             dialog.dismiss();
             Intent intent = new Intent(getActivity(), LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -81,12 +124,7 @@ public class ProfileFragment extends Fragment {
 
     private void navigateToFragment(Fragment fragment) {
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(
-                R.anim.slide_in_right,
-                R.anim.slide_out_left,
-                R.anim.slide_in_left,
-                R.anim.slide_out_right
-        );
+        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right);
         transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(null);
         transaction.commit();

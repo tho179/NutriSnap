@@ -7,8 +7,15 @@ import com.example.nutrisnap.model.DailyDataCallback;
 import com.example.nutrisnap.model.DailySummaryData;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DailyController {
 
@@ -16,6 +23,11 @@ public class DailyController {
 
     public DailyController() {
         db = FirebaseFirestore.getInstance();
+    }
+
+    public interface DailyListCallback {
+        void onSuccess(Map<String, DailySummaryData> dataMap);
+        void onFailure(Exception e);
     }
 
     public void fetchDailySummary(String userId, String date, DailyDataCallback callback) {
@@ -84,5 +96,46 @@ public class DailyController {
                     }
                 })
                 .addOnFailureListener(e -> callback.onFailure(e));
+    }
+
+    public void fetchRangeSummary(String userId, List<String> dates, DailyListCallback callback) {
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(userDoc -> {
+                    int targetCal = userDoc.contains("targetCalories") ? userDoc.getDouble("targetCalories").intValue() : 2500;
+                    int targetCarbs = userDoc.contains("targetCarbs") ? userDoc.getDouble("targetCarbs").intValue() : 224;
+                    int targetProtein = userDoc.contains("targetProtein") ? userDoc.getDouble("targetProtein").intValue() : 128;
+                    int targetFat = userDoc.contains("targetFat") ? userDoc.getDouble("targetFat").intValue() : 128;
+
+                    Map<String, DailySummaryData> resultMap = new HashMap<>();
+                    List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
+
+                    for (String date : dates) {
+                        tasks.add(db.collection("users").document(userId)
+                                .collection("daily_logs").document(date).get());
+                    }
+
+                    Tasks.whenAllComplete(tasks).addOnCompleteListener(t -> {
+                        for (int i = 0; i < dates.size(); i++) {
+                            DocumentSnapshot doc = tasks.get(i).getResult();
+                            DailySummaryData data = new DailySummaryData();
+                            data.targetCalories = targetCal;
+                            data.carbsTarget = targetCarbs;
+                            data.proteinTarget = targetProtein;
+                            data.fatTarget = targetFat;
+
+                            if (doc != null && doc.exists()) {
+                                data.totalCaloriesIn = doc.contains("totalCaloriesIn") ? doc.getDouble("totalCaloriesIn").intValue() : 0;
+                                data.carbsEaten = doc.contains("totalCarbs") ? doc.getDouble("totalCarbs").intValue() : 0;
+                                data.proteinEaten = doc.contains("totalProtein") ? doc.getDouble("totalProtein").intValue() : 0;
+                                data.fatEaten = doc.contains("totalFat") ? doc.getDouble("totalFat").intValue() : 0;
+                            } else {
+                                data.totalCaloriesIn = 0;
+                            }
+                            resultMap.put(dates.get(i), data);
+                        }
+                        callback.onSuccess(resultMap);
+                    });
+                })
+                .addOnFailureListener(callback::onFailure);
     }
 }
