@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -29,15 +30,19 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.nutrisnap.R;
 import com.example.nutrisnap.controller.MealController;
+import com.example.nutrisnap.model.AIOnResultListener;
 import com.example.nutrisnap.model.FoodItem;
 import com.example.nutrisnap.model.MealCallback;
 import com.example.nutrisnap.model.MealRecord;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -62,7 +67,7 @@ public abstract class BaseMealFragment extends Fragment {
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         if (currentPhotoPath != null) {
-                            onImageCaptured(Uri.fromFile(new File(currentPhotoPath)));
+                            analyzeImage(Uri.fromFile(new File(currentPhotoPath)));
                         }
                     }
                 }
@@ -72,7 +77,7 @@ public abstract class BaseMealFragment extends Fragment {
                 new ActivityResultContracts.GetContent(),
                 uri -> {
                     if (uri != null) {
-                        onImageCaptured(uri);
+                        analyzeImage(uri);
                     }
                 }
         );
@@ -137,6 +142,17 @@ public abstract class BaseMealFragment extends Fragment {
         tvName.setText(foodItem.getName());
         tvKcal.setText(String.format(Locale.getDefault(), "%d kcal", (int)foodItem.getCalories()));
         if (imageUri != null) imgFood.setImageURI(imageUri);
+
+        // Chuyển sang Analysis khi nhấn vào món ăn
+        itemView.setOnClickListener(v -> {
+            MealRecord singleMeal = new MealRecord(getMealType(), System.currentTimeMillis(), Collections.singletonList(foodItem));
+            // Trước khi đi, xóa món cũ để tránh trùng lặp khi quay lại (nếu người dùng nhấn Add)
+            // Hoặc có thể dùng logic update thay vì add mới. Ở đây ta đơn giản là cho phép view/edit.
+            // Để đơn giản, ta xóa nó khỏi danh sách hiện tại, và AnalysisFragment sẽ gửi lại item mới.
+            layoutFoodList.removeView(itemView);
+            currentFoodList.remove(foodItem);
+            onImageAnalyzed(imageUri, singleMeal);
+        });
 
         btnDelete.setOnClickListener(v -> {
             showDeleteConfirmationDialog(() -> {
@@ -228,8 +244,49 @@ public abstract class BaseMealFragment extends Fragment {
         return image;
     }
 
-    protected void onImageCaptured(Uri imageUri) {
-        AnalysisFragment analysisFragment = AnalysisFragment.newInstance(imageUri);
+    private void analyzeImage(Uri uri) {
+        ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setMessage("Đang nhận diện món ăn...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        try {
+            File imageFile = getFileFromUri(uri);
+            mealController.recognizeMealFromImage(imageFile, new AIOnResultListener() {
+                @Override
+                public void onSuccess(MealRecord mealRecord) {
+                    progressDialog.dismiss();
+                    onImageAnalyzed(uri, mealRecord);
+                }
+
+                @Override
+                public void onError(String message) {
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(), "Lỗi nhận diện: " + message, Toast.LENGTH_LONG).show();
+                }
+            });
+        } catch (IOException e) {
+            progressDialog.dismiss();
+            Toast.makeText(getContext(), "Lỗi đọc file ảnh", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private File getFileFromUri(Uri uri) throws IOException {
+        File tempFile = new File(requireContext().getCacheDir(), "temp_image.jpg");
+        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
+             FileOutputStream outputStream = new FileOutputStream(tempFile)) {
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+        }
+        return tempFile;
+    }
+
+    protected void onImageAnalyzed(Uri imageUri, MealRecord mealRecord) {
+        AnalysisFragment analysisFragment = AnalysisFragment.newInstance(imageUri, mealRecord);
         getParentFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, analysisFragment)
                 .addToBackStack(null)

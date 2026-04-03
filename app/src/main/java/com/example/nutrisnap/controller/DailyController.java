@@ -8,7 +8,12 @@ import com.example.nutrisnap.model.DailySummaryData;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DailyController {
 
@@ -16,6 +21,11 @@ public class DailyController {
 
     public DailyController() {
         db = FirebaseFirestore.getInstance();
+    }
+
+    public interface UpdateCallback {
+        void onSuccess();
+        void onFailure(Exception e);
     }
 
     public void fetchDailySummary(String userId, String date, DailyDataCallback callback) {
@@ -83,6 +93,17 @@ public class DailyController {
                         callback.onSuccess(summary);
                     }
                 })
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
+
+    public void updateWaterIntake(String userId, String date, int amountToAdd, UpdateCallback callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("totalWater", FieldValue.increment(amountToAdd));
+
+        db.collection("users").document(userId)
+                .collection("daily_logs").document(date)
+                .set(updates, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
 }
