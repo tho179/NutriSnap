@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Sáng"
+            android:text="Bữa sáng"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -40,6 +40,13 @@
             android:backgroundTint="@color/primary_green"
             android:text="Lưu"
             android:textColor="@color/white" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_nav"
+        android:layout_below="@id/toolbar_breakfast">
 
         <LinearLayout
             android:id="@+id/layout_food_list"
@@ -49,14 +56,6 @@
             android:orientation="vertical">
             <!-- Items will be added dynamically -->
         </LinearLayout>
-    </RelativeLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottom_nav"
-        android:layout_below="@id/toolbar_breakfast">
-
     </ScrollView>
 
     <RelativeLayout

@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,21 +28,16 @@ import com.example.nutrisnap.model.DailySummaryData;
 import com.example.nutrisnap.ui.notification.NotificationFragment;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
     // 1. Khai báo các biến giao diện
-    private TextView tvHomeDate, tvWaterProgress;
-    private ProgressBar progressWater;
+    private TextView tvHomeDate, tvWaterProgressCircular;
+    private ProgressBar progressWaterCircular;
 
     // Khai báo thêm UI cho Dinh dưỡng (Kcal, Carbs, Protein, Fat)
     private TextView tvKcalLeft, tvCarbs, tvProtein, tvFat;
@@ -75,8 +69,8 @@ public class HomeFragment extends Fragment {
 
         // Ánh xạ View cơ bản
         tvHomeDate = view.findViewById(R.id.tv_home_date);
-        tvWaterProgress = view.findViewById(R.id.tv_water_progress);
-        progressWater = view.findViewById(R.id.progress_water);
+        tvWaterProgressCircular = view.findViewById(R.id.tv_water_progress_circular);
+        progressWaterCircular = view.findViewById(R.id.progress_water_circular);
 
         tvKcalLeft = view.findViewById(R.id.tv_kcal_left);
         tvCarbs = view.findViewById(R.id.tv_carbs);
@@ -102,8 +96,10 @@ public class HomeFragment extends Fragment {
         ImageView imgCalendarPicker = view.findViewById(R.id.img_calendar_picker);
         ImageView imgPrevDate = view.findViewById(R.id.img_prev_date);
         ImageView imgNextDate = view.findViewById(R.id.img_next_date);
-        ImageView btnAddWater = view.findViewById(R.id.btn_add_water);
+        ImageView btnAddWaterTop = view.findViewById(R.id.btn_add_water_top);
         ImageView btnNotification = view.findViewById(R.id.btn_notification);
+
+        updateDateLabelAndFetchData();
 
         // Sự kiện chuyển ngày
         imgCalendarPicker.setOnClickListener(v -> showDatePicker());
@@ -116,10 +112,7 @@ public class HomeFragment extends Fragment {
             updateDateLabelAndFetchData(); // Cập nhật ngày và tải lại dữ liệu
         });
 
-        btnAddWater.setOnClickListener(v -> showDrinkWaterDialog());
-
-        // Chạy lần đầu tiên khi mở Fragment
-        updateDateLabelAndFetchData();
+        if (btnAddWaterTop != null) btnAddWaterTop.setOnClickListener(v -> showDrinkWaterDialog());
 
         // Các sự kiện chuyển trang (giữ nguyên)
         if (btnNotification != null) btnNotification.setOnClickListener(v -> navigateToFragment(new NotificationFragment()));
@@ -138,11 +131,12 @@ public class HomeFragment extends Fragment {
     private void updateDateLabelAndFetchData() {
         // 1. Cập nhật Text hiển thị ngày
         Calendar today = Calendar.getInstance();
+        Locale localeVN = new Locale("vi", "VN");
         if (calendar.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
                 calendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
-            tvHomeDate.setText("Today, " + new SimpleDateFormat("MMM dd", Locale.US).format(calendar.getTime()));
+            tvHomeDate.setText("Hôm nay, " + new SimpleDateFormat("dd 'Th'M", localeVN).format(calendar.getTime()));
         } else {
-            tvHomeDate.setText(new SimpleDateFormat("EEE, MMM dd", Locale.US).format(calendar.getTime()));
+            tvHomeDate.setText(new SimpleDateFormat("EEE, dd 'Th'M", localeVN).format(calendar.getTime()));
         }
 
         // 2. Chuyển đổi ngày đang chọn thành chuỗi "yyyy-MM-dd" để truy vấn Firebase
@@ -189,10 +183,10 @@ public class HomeFragment extends Fragment {
                 }
 
                 // Cập nhật Water
-                if(tvWaterProgress != null)
-                    tvWaterProgress.setText(data.waterDrank + "\n/" + data.waterTarget + "ml");
-                if(progressWater != null) {
-                    progressWater.setMax(data.waterTarget); progressWater.setProgress(data.waterDrank);
+                if(tvWaterProgressCircular != null)
+                    tvWaterProgressCircular.setText(data.waterDrank + "\n/" + data.waterTarget + "ml");
+                if(progressWaterCircular != null) {
+                    progressWaterCircular.setMax(data.waterTarget); progressWaterCircular.setProgress(data.waterDrank);
                 }
 
                 // CẬP NHẬT DỮ LIỆU CÁC BỮA ĂN (MEALS)
@@ -222,7 +216,7 @@ public class HomeFragment extends Fragment {
     }
 
     // =========================================================
-    // PHẦN LOGIC THÊM NƯỚC UỐNG VÀ LƯU FIREBASE
+    // PHẦN LOGIC THÊM/GIẢM NƯỚC UỐNG
     // =========================================================
 
     private void showDrinkWaterDialog() {
@@ -235,6 +229,7 @@ public class HomeFragment extends Fragment {
 
         EditText edtAmount = dialogView.findViewById(R.id.edt_water_amount);
         Button btnDrink = dialogView.findViewById(R.id.btn_drink_dialog);
+        Button btnRemove = dialogView.findViewById(R.id.btn_remove_water_dialog);
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel_dialog);
         ImageView btnClose = dialogView.findViewById(R.id.btn_close_dialog);
 
@@ -242,10 +237,21 @@ public class HomeFragment extends Fragment {
             String amountStr = edtAmount.getText().toString();
             if (!amountStr.isEmpty()) {
                 int amount = Integer.parseInt(amountStr);
-                saveWaterToFirebase(amount); // Đẩy lên DB
+                saveWaterToFirebase(amount);
                 dialog.dismiss();
             } else {
                 Toast.makeText(getContext(), "Vui lòng nhập lượng nước", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnRemove.setOnClickListener(v -> {
+            String amountStr = edtAmount.getText().toString();
+            if (!amountStr.isEmpty()) {
+                int amount = Integer.parseInt(amountStr);
+                saveWaterToFirebase(-amount); // Gửi giá trị âm để giảm
+                dialog.dismiss();
+            } else {
+                Toast.makeText(getContext(), "Vui lòng nhập lượng nước cần giảm", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -254,25 +260,24 @@ public class HomeFragment extends Fragment {
         dialog.show();
     }
 
-    private void saveWaterToFirebase(int amountToAdd) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private void saveWaterToFirebase(int amount) {
+        dailyController.updateWaterIntake(currentUserId, currentDateStr, amount, new DailyController.UpdateCallback() {
+            @Override
+            public void onSuccess() {
+                if (isAdded()) {
+                    String message = amount > 0 ? "Đã thêm " + amount + "ml nước" : "Đã giảm " + Math.abs(amount) + "ml nước";
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    fetchDataForSelectedDate(); // Refresh UI
+                }
+            }
 
-        // Lưu dữ liệu vào document của ngày đang chọn
-        Map<String, Object> updates = new HashMap<>();
-        // Dùng FieldValue.increment() để Firebase tự động cộng dồn (rất an toàn)
-        updates.put("totalWater", FieldValue.increment(amountToAdd));
-
-        db.collection("users").document(currentUserId)
-                .collection("daily_logs").document(currentDateStr)
-                .set(updates, SetOptions.merge()) // SetOptions.merge() giúp giữ nguyên các trường khác (như calo, carbs)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Đã thêm " + amountToAdd + "ml nước", Toast.LENGTH_SHORT).show();
-                    // Sau khi lưu thành công, tải lại toàn bộ giao diện cho mới
-                    fetchDataForSelectedDate();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Lỗi khi lưu nước uống", Toast.LENGTH_SHORT).show();
-                });
+            @Override
+            public void onFailure(Exception e) {
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "Lỗi khi cập nhật nước uống", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     // =========================================================
@@ -297,7 +302,6 @@ public class HomeFragment extends Fragment {
 
     private void navigateToFragment(Fragment fragment) {
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right);
         transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
