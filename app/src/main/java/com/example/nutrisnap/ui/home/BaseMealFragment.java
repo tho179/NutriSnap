@@ -1,48 +1,69 @@
 package com.example.nutrisnap.ui.home;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.nutrisnap.R;
+import com.example.nutrisnap.controller.MealController;
+import com.example.nutrisnap.model.FoodItem;
+import com.example.nutrisnap.model.MealCallback;
+import com.example.nutrisnap.model.MealRecord;
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public abstract class BaseMealFragment extends Fragment {
 
+    protected MealController mealController;
+    protected List<FoodItem> currentFoodList = new ArrayList<>();
+    protected LinearLayout layoutFoodList;
     private String currentPhotoPath;
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
+    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mealController = new MealController();
 
         cameraLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                        onImageCaptured(Uri.fromFile(new File(currentPhotoPath)));
+                        if (currentPhotoPath != null) {
+                            onImageCaptured(Uri.fromFile(new File(currentPhotoPath)));
+                        }
                     }
                 }
         );
@@ -55,11 +76,24 @@ public abstract class BaseMealFragment extends Fragment {
                     }
                 }
         );
+
+        requestCameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        openCamera();
+                    } else {
+                        Toast.makeText(getContext(), "Quyền camera bị từ chối", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
     }
 
     protected void setupBaseViews(View view) {
         ImageView btnBack = view.findViewById(R.id.btn_back);
         ImageView btnScan = view.findViewById(R.id.btn_scan);
+        Button btnSave = view.findViewById(R.id.btn_save_meal);
+        layoutFoodList = view.findViewById(R.id.layout_food_list);
 
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -68,6 +102,79 @@ public abstract class BaseMealFragment extends Fragment {
         if (btnScan != null) {
             btnScan.setOnClickListener(v -> showImageSourceDialog());
         }
+
+        if (btnSave != null) {
+            btnSave.setOnClickListener(v -> saveMeal());
+        }
+
+        getParentFragmentManager().setFragmentResultListener("add_food_request", this, (requestKey, bundle) -> {
+            String name = bundle.getString("food_name");
+            int kcal = bundle.getInt("food_kcal");
+            double protein = bundle.getDouble("food_protein", 0);
+            double carbs = bundle.getDouble("food_carbs", 0);
+            double fat = bundle.getDouble("food_fat", 0);
+            Uri imageUri = bundle.getParcelable("food_image");
+            
+            FoodItem newItem = new FoodItem(name, 1, kcal, protein, carbs, fat);
+            addFoodToUI(newItem, imageUri);
+        });
+    }
+
+    protected abstract String getMealType();
+
+    protected void addFoodToUI(FoodItem foodItem, Uri imageUri) {
+        if (layoutFoodList == null) return;
+        
+        currentFoodList.add(foodItem);
+        
+        View itemView = LayoutInflater.from(getContext()).inflate(R.layout.item_food_row, layoutFoodList, false);
+        
+        TextView tvName = itemView.findViewById(R.id.tv_food_name);
+        TextView tvKcal = itemView.findViewById(R.id.tv_food_kcal);
+        ImageView imgFood = itemView.findViewById(R.id.img_food_icon);
+        ImageView btnDelete = itemView.findViewById(R.id.btn_delete_food);
+
+        tvName.setText(foodItem.getName());
+        tvKcal.setText(String.format(Locale.getDefault(), "%d kcal", (int)foodItem.getCalories()));
+        if (imageUri != null) imgFood.setImageURI(imageUri);
+
+        btnDelete.setOnClickListener(v -> {
+            showDeleteConfirmationDialog(() -> {
+                layoutFoodList.removeView(itemView);
+                currentFoodList.remove(foodItem);
+            });
+        });
+
+        layoutFoodList.addView(itemView);
+    }
+
+    protected void saveMeal() {
+        if (currentFoodList.isEmpty()) {
+            Toast.makeText(getContext(), "Vui lòng thêm ít nhất một món ăn", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = FirebaseAuth.getInstance().getUid();
+        if (userId == null) {
+            Toast.makeText(getContext(), "Chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        MealRecord mealRecord = new MealRecord(getMealType(), System.currentTimeMillis(), currentFoodList);
+
+        mealController.addMeal(userId, date, mealRecord, new MealCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(getContext(), "Lưu bữa ăn thành công!", Toast.LENGTH_SHORT).show();
+                getParentFragmentManager().popBackStack();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void showImageSourceDialog() {
@@ -85,6 +192,12 @@ public abstract class BaseMealFragment extends Fragment {
     }
 
     private void openCamera() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+            return;
+        }
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         File photoFile = null;
         try {
@@ -124,7 +237,6 @@ public abstract class BaseMealFragment extends Fragment {
                 .commit();
     }
 
-    // Phương thức hiển thị Popup xác nhận xóa món ăn
     protected void showDeleteConfirmationDialog(Runnable onConfirm) {
         Dialog dialog = new Dialog(requireContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);

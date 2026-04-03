@@ -3,6 +3,7 @@ package com.example.nutrisnap.model;
 import java.util.List;
 
 public class MealRecord {
+    private String id;
     private String mealType; // Ví dụ: "Sáng", "Trưa", "Tối"
     private long timeLogged; // Lưu dưới dạng Timestamp
     private List<FoodItem> foods; // Mảng chứa các món ăn trong bữa này
@@ -16,6 +17,9 @@ public class MealRecord {
     }
 
     // --- Getters & Setters ---
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
     public String getMealType() { return mealType; }
     public void setMealType(String mealType) { this.mealType = mealType; }
 

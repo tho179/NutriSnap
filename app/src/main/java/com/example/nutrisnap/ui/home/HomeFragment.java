@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.nutrisnap.R;
 import com.example.nutrisnap.controller.DailyController;
+import com.example.nutrisnap.model.DailyDataCallback;
 import com.example.nutrisnap.model.DailySummaryData;
 import com.example.nutrisnap.ui.notification.NotificationFragment;
 
@@ -47,6 +48,10 @@ public class HomeFragment extends Fragment {
     // Khai báo thêm UI cho Dinh dưỡng (Kcal, Carbs, Protein, Fat)
     private TextView tvKcalLeft, tvCarbs, tvProtein, tvFat;
     private ProgressBar progressKcal, progressCarbs, progressProtein, progressFat;
+
+    // UI cho các bữa ăn
+    private TextView tvBreakfastKcal, tvLunchKcal, tvDinnerKcal, tvSnacksKcal;
+    private ProgressBar progressBreakfast, progressLunch, progressDinner, progressSnacks;
 
     private final Calendar calendar = Calendar.getInstance();
 
@@ -82,6 +87,17 @@ public class HomeFragment extends Fragment {
         progressCarbs = view.findViewById(R.id.progress_carbs);
         progressProtein = view.findViewById(R.id.progress_protein);
         progressFat = view.findViewById(R.id.progress_fat);
+
+        // Ánh xạ View cho Meals
+        tvBreakfastKcal = view.findViewById(R.id.tv_breakfast_kcal);
+        tvLunchKcal = view.findViewById(R.id.tv_lunch_kcal);
+        tvDinnerKcal = view.findViewById(R.id.tv_dinner_kcal);
+        tvSnacksKcal = view.findViewById(R.id.tv_snacks_kcal);
+
+        progressBreakfast = view.findViewById(R.id.progress_breakfast);
+        progressLunch = view.findViewById(R.id.progress_lunch);
+        progressDinner = view.findViewById(R.id.progress_dinner);
+        progressSnacks = view.findViewById(R.id.progress_snacks);
 
         ImageView imgCalendarPicker = view.findViewById(R.id.img_calendar_picker);
         ImageView imgPrevDate = view.findViewById(R.id.img_prev_date);
@@ -138,15 +154,18 @@ public class HomeFragment extends Fragment {
     }
 
     private void fetchDataForSelectedDate() {
-        dailyController.fetchDailySummary(currentUserId, currentDateStr, new DailyController.DailyDataCallback() {
+        dailyController.fetchDailySummary(currentUserId, currentDateStr, new DailyDataCallback() {
             @Override
             public void onSuccess(DailySummaryData data) {
                 // Kiểm tra Fragment còn tồn tại không trước khi update UI
                 if (!isAdded()) return;
 
-                // Cập nhật Kcal
+                // Cập nhật Kcal trung tâm
                 if(tvKcalLeft != null) tvKcalLeft.setText(String.valueOf(data.kcalLeft));
-                // progressKcal.setMax(...) và setProgress(...)
+                if(progressKcal != null) {
+                    progressKcal.setMax(data.targetCalories);
+                    progressKcal.setProgress(data.totalCaloriesIn);
+                }
 
                 // Cập nhật Carbs
                 if(tvCarbs != null)
@@ -175,6 +194,12 @@ public class HomeFragment extends Fragment {
                 if(progressWater != null) {
                     progressWater.setMax(data.waterTarget); progressWater.setProgress(data.waterDrank);
                 }
+
+                // CẬP NHẬT DỮ LIỆU CÁC BỮA ĂN (MEALS)
+                updateMealUI(tvBreakfastKcal, progressBreakfast, data.breakfastKcal, data.breakfastTarget);
+                updateMealUI(tvLunchKcal, progressLunch, data.lunchKcal, data.lunchTarget);
+                updateMealUI(tvDinnerKcal, progressDinner, data.dinnerKcal, data.dinnerTarget);
+                updateMealUI(tvSnacksKcal, progressSnacks, data.snackKcal, data.snackTarget);
             }
 
             @Override
@@ -184,6 +209,16 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), "Không thể tải dữ liệu", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void updateMealUI(TextView tvKcal, ProgressBar progress, int current, int target) {
+        if (tvKcal != null) {
+            tvKcal.setText(current + " / " + target + " kcal");
+        }
+        if (progress != null) {
+            progress.setMax(target);
+            progress.setProgress(current);
+        }
     }
 
     // =========================================================

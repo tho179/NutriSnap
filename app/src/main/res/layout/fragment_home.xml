@@ -195,8 +195,8 @@
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_br" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Breakfast" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="8dp">
-                            <ProgressBar style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="100" android:progressDrawable="@drawable/custom_progress_meal" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="824 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
+                            <ProgressBar android:id="@+id/progress_breakfast" style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
+                            <TextView android:id="@+id/tv_breakfast_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />
@@ -216,8 +216,8 @@
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_ln" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lunch" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="8dp">
-                            <ProgressBar style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="100" android:progressDrawable="@drawable/custom_progress_meal" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="824 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
+                            <ProgressBar android:id="@+id/progress_lunch" style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
+                            <TextView android:id="@+id/tv_lunch_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />
@@ -237,8 +237,8 @@
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_dn" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dinner" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="8dp">
-                            <ProgressBar style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
+                            <ProgressBar android:id="@+id/progress_dinner" style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
+                            <TextView android:id="@+id/tv_dinner_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />
@@ -258,8 +258,8 @@
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_sn" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Snacks" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="8dp">
-                            <ProgressBar style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
+                            <ProgressBar android:id="@+id/progress_snacks" style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
+                            <TextView android:id="@+id/tv_snacks_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />

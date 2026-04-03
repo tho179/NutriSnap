@@ -20,10 +20,10 @@ public class AnalysisFragment extends Fragment {
     private Uri imageUri;
     private int quantity = 1;
 
-    private final float baseProtein = 10f;
-    private final float baseCarbs = 6f;
-    private final float baseFat = 4f;
-    private final int baseKcal = 150;
+    private float baseProtein = 10f;
+    private float baseCarbs = 6f;
+    private float baseFat = 4f;
+    private int baseKcal = 150;
 
     public static AnalysisFragment newInstance(Uri imageUri) {
         AnalysisFragment fragment = new AnalysisFragment();
@@ -88,10 +88,12 @@ public class AnalysisFragment extends Fragment {
         }
 
         btnAdd.setOnClickListener(v -> {
-            // Gửi kết quả về Fragment gọi nó
             Bundle result = new Bundle();
             result.putString("food_name", tvFoodName.getText().toString());
             result.putInt("food_kcal", baseKcal * quantity);
+            result.putDouble("food_protein", (double) baseProtein * quantity);
+            result.putDouble("food_carbs", (double) baseCarbs * quantity);
+            result.putDouble("food_fat", (double) baseFat * quantity);
             result.putParcelable("food_image", imageUri);
             
             getParentFragmentManager().setFragmentResult("add_food_request", result);
@@ -113,6 +115,8 @@ public class AnalysisFragment extends Fragment {
         tvCarbs.setText(String.format(Locale.getDefault(), "● Carbs-%.0fg", currentCarbs));
         tvFat.setText(String.format(Locale.getDefault(), "● Fat-%.0fg", currentFat));
 
-        chart.setData(currentProtein, currentCarbs, currentFat);
+        if (chart != null) {
+            chart.setData(currentProtein, currentCarbs, currentFat);
+        }
     }
 }
