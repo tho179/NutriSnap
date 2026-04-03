@@ -10,7 +10,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +29,11 @@ public class DailyController {
 
     public interface DailyListCallback {
         void onSuccess(Map<String, DailySummaryData> dataMap);
+        void onFailure(Exception e);
+    }
+
+    public interface UpdateCallback {
+        void onSuccess();
         void onFailure(Exception e);
     }
 
@@ -137,5 +144,16 @@ public class DailyController {
                     });
                 })
                 .addOnFailureListener(callback::onFailure);
+    }
+
+    public void updateWaterIntake(String userId, String date, int amountToAdd, UpdateCallback callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("totalWater", FieldValue.increment(amountToAdd));
+
+        db.collection("users").document(userId)
+                .collection("daily_logs").document(date)
+                .set(updates, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e));
     }
 }
