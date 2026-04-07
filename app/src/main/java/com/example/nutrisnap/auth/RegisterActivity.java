@@ -3,29 +3,88 @@ package com.example.nutrisnap.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import com.example.nutrisnap.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private boolean isPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        EditText etUsername = findViewById(R.id.et_username);
+        EditText etEmail = findViewById(R.id.et_email);
         EditText etPassword = findViewById(R.id.et_password);
         EditText etConfirmPassword = findViewById(R.id.et_confirm_password);
         AppCompatButton btnCreate = findViewById(R.id.btn_create);
         TextView tvReturn = findViewById(R.id.tv_return);
 
-        // Password Toggle
+        setupPasswordToggles(etPassword, etConfirmPassword);
+
+        btnCreate.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String email = etEmail.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+            String confirmPass = etConfirmPassword.getText().toString().trim();
+
+            if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!password.equals(confirmPass)) {
+                Toast.makeText(this, "Mật khẩu không khớp", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    String userId = authResult.getUser().getUid();
+                    
+                    // Chỉ tạo thông tin cơ bản, không tạo data mẫu (cân nặng, chiều cao...)
+                    Map<String, Object> user = new HashMap<>();
+                    user.put("username", username);
+                    user.put("email", email);
+
+                    db.collection("users").document(userId).set(user)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(RegisterActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(RegisterActivity.this, WelcomeActivity.class));
+                            finish();
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("NutriSnap_Error", "Firestore Save Failed: " + e.getMessage());
+                        });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(RegisterActivity.this, "Lỗi đăng ký: " + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                });
+        });
+
+        tvReturn.setOnClickListener(v -> finish());
+    }
+
+    private void setupPasswordToggles(EditText etPassword, EditText etConfirmPassword) {
         etPassword.setOnTouchListener((v, event) -> {
             final int DRAWABLE_RIGHT = 2;
             if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -37,7 +96,6 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         });
 
-        // Confirm Password Toggle
         etConfirmPassword.setOnTouchListener((v, event) -> {
             final int DRAWABLE_RIGHT = 2;
             if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -47,18 +105,6 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
             return false;
-        });
-
-        // Create Button Click - Chuyển sang WelcomeActivity
-        btnCreate.setOnClickListener(v -> {
-            Intent intent = new Intent(RegisterActivity.this, WelcomeActivity.class);
-            startActivity(intent);
-            finish(); // Đóng màn hình Register
-        });
-
-        // Return Link Click
-        tvReturn.setOnClickListener(v -> {
-            finish(); // Quay lại màn hình Login
         });
     }
 

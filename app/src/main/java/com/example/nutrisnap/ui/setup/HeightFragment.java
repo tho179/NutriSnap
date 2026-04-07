@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.example.nutrisnap.R;
 
-public class HeightFragment extends Fragment {
+public class HeightFragment extends Fragment implements SetupProfileActivity.SetupDataInterface {
 
     private TextView tvUnitCm, tvUnitFt;
     private EditText etHeight;
@@ -30,42 +30,41 @@ public class HeightFragment extends Fragment {
         tvUnitCm.setOnClickListener(v -> selectUnit(true));
         tvUnitFt.setOnClickListener(v -> selectUnit(false));
 
-        // Mặc định chọn cm
         selectUnit(true);
-
         return view;
     }
 
     private void selectUnit(boolean isCm) {
         isCmSelected = isCm;
         if (isCm) {
-            // cm selected
             tvUnitCm.setBackgroundResource(R.drawable.bg_button_green);
             tvUnitCm.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
-            
             tvUnitFt.setBackgroundResource(R.drawable.bg_unit_toggle);
             tvUnitFt.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-            
             etHeight.setHint("170");
         } else {
-            // ft selected
             tvUnitFt.setBackgroundResource(R.drawable.bg_button_green);
             tvUnitFt.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
-            
             tvUnitCm.setBackgroundResource(R.drawable.bg_unit_toggle);
             tvUnitCm.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-            
             etHeight.setHint("5.6");
         }
-        // Xóa text cũ khi chuyển đơn vị để tránh nhầm lẫn
-        etHeight.setText("");
     }
 
-    public boolean isCmSelected() {
-        return isCmSelected;
-    }
-
-    public String getHeightValue() {
-        return etHeight.getText().toString();
+    @Override
+    public void saveData() {
+        String heightStr = etHeight.getText().toString();
+        if (!heightStr.isEmpty()) {
+            try {
+                double height = Double.parseDouble(heightStr);
+                // Nếu là feet, đổi sang cm để lưu thống nhất
+                if (!isCmSelected) {
+                    height = height * 30.48;
+                }
+                ((SetupProfileActivity) requireActivity()).updateUserField("currentHeight", height);
+            } catch (NumberFormatException e) {
+                // Ignore
+            }
+        }
     }
 }

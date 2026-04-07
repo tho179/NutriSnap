@@ -25,34 +25,41 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Lunch"
+            android:text="Bữa trưa"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btn_save_meal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="Lưu"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/primary_green"
+            style="@style/Widget.AppCompat.Button.Borderless" />
     </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_food_list"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar_lunch"
-        android:background="@color/white"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_nav"
+        android:layout_below="@id/toolbar_lunch">
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/layout_food_list"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:paddingHorizontal="20dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="No lunch logged yet"
-                android:textColor="#757575" />
-        </RelativeLayout>
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="vertical">
+            <!-- Items will be added dynamically -->
+        </LinearLayout>
+    </ScrollView>
 
     <RelativeLayout
+        android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_alignParentBottom="true"

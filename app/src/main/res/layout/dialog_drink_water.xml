@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="Drink water"
+                android:text="Uống nước"
                 android:textColor="#4FC3F7"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -71,18 +71,30 @@
             android:layout_below="@id/edt_water_amount"
             android:layout_marginTop="30dp"
             android:orientation="horizontal"
-            android:weightSum="2">
+            android:weightSum="3">
 
             <Button
                 android:id="@+id/btn_cancel_dialog"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="#E8F5E9"
-                android:text="Cancel"
+                android:layout_marginEnd="5dp"
+                android:backgroundTint="#F5F5F5"
+                android:text="Hủy"
                 android:textAllCaps="false"
-                android:textColor="#4CAF50"
+                android:textColor="#757575"
+                app:cornerRadius="20dp" />
+
+            <Button
+                android:id="@+id/btn_remove_water_dialog"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="5dp"
+                android:backgroundTint="#FFEBEE"
+                android:text="Giảm"
+                android:textAllCaps="false"
+                android:textColor="#D32F2F"
                 app:cornerRadius="20dp" />
 
             <Button
@@ -91,7 +103,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="#4CAF50"
-                android:text="Drink"
+                android:text="Uống"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 app:cornerRadius="20dp" />
