@@ -57,4 +57,10 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!-- Bottom Navigation Text Style -->
+    <style name="BottomNavText">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>
