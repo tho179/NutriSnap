@@ -13,17 +13,40 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.example.nutrisnap.MainActivity;
 import com.example.nutrisnap.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.sse.EventSource;
+import okhttp3.sse.EventSourceListener;
+import okhttp3.sse.EventSources;
 
 public class ChatbotFragment extends Fragment {
 
     private LinearLayout layoutChatContainer;
     private ScrollView scrollChat;
     private EditText edtChat;
+
+    // Các biến phục vụ gọi API Streaming
+    private OkHttpClient client;
+    private EventSource.Factory eventSourceFactory;
+    private String currentSessionId;
 
     @Nullable
     @Override
@@ -36,14 +59,21 @@ public class ChatbotFragment extends Fragment {
         layoutChatContainer = view.findViewById(R.id.layout_chat_container);
         scrollChat = view.findViewById(R.id.scroll_chat);
 
+        // Khởi tạo Client mạng (có time out dài để đợi AI nghĩ)
+        client = new OkHttpClient.Builder()
+                .readTimeout(0, TimeUnit.MILLISECONDS) // Không giới hạn thời gian đọc stream
+                .build();
+        eventSourceFactory = EventSources.createFactory(client);
+
+        // Tạo một ID duy nhất cho đoạn chat này khi mới mở trang
+        currentSessionId = UUID.randomUUID().toString();
+
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> {
                 hideKeyboard();
                 if (getActivity() instanceof MainActivity) {
-                    // Gọi phương thức điều hướng về Home trong MainActivity
                     ((MainActivity) getActivity()).navigateToHome();
                 } else if (getActivity() != null) {
-                    // Fallback
                     getParentFragmentManager().popBackStack();
                 }
             });
@@ -58,18 +88,78 @@ public class ChatbotFragment extends Fragment {
             btnSend.setOnClickListener(v -> {
                 String msg = edtChat.getText().toString().trim();
                 if (!msg.isEmpty()) {
+                    // 1. In tin nhắn user lên màn hình
                     addUserMessage(msg);
                     edtChat.setText("");
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        if (isAdded()) {
-                            addBotMessage("I am processing your request about: " + msg);
-                        }
-                    }, 1000);
+
+                    // 2. Tạo sẵn 1 khung tin nhắn Bot trống rỗng
+                    TextView currentBotTextView = addBotMessage("");
+
+                    // 3. Gọi API lấy dữ liệu Real-time
+                    streamChatFromBackend(msg, currentBotTextView);
                 }
             });
         }
 
         return view;
+    }
+
+    private void streamChatFromBackend(String userMessage, TextView botTextView) {
+        // Tạo chuỗi JSON gửi đi
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("sessionId", currentSessionId);
+            jsonBody.put("userId", "android_user_test"); // Sau này lấy ID thật từ Firebase Auth
+            jsonBody.put("message", userMessage);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.parse("application/json"));
+
+        // LƯU Ý ĐỊA CHỈ IP: 10.0.2.2 là localhost của máy tính khi chạy trên máy ảo Android (Emulator)
+        // Nếu bạn cắm điện thoại thật để chạy, phải thay bằng IPv4 của máy tính (VD: 192.168.1.x)
+        Request request = new Request.Builder()
+                .url("http://10.0.2.2:8080/api/chat/stream")
+                .addHeader("Accept", "text/event-stream") // Bắt buộc cho SSE
+                .post(body)
+                .build();
+
+        // Lắng nghe dữ liệu chảy về
+        eventSourceFactory.newEventSource(request, new EventSourceListener() {
+            @Override
+            public void onEvent(@Nullable EventSource eventSource, @Nullable String id, @Nullable String type, @NonNull String data) {
+                // onEvent chạy ngầm, muốn cập nhật UI (TextView) phải đẩy lên Main Thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        try {
+                            // Dữ liệu giờ là JSON, ta bóc key "text" ra để lấy chữ nguyên bản
+                            JSONObject json = new JSONObject(data);
+                            if (json.has("text")) {
+                                botTextView.append(json.getString("text")); // Nối chữ
+                                scrollToBottom();         // Kéo cuộn màn hình xuống
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onClosed(@NonNull EventSource eventSource) {
+                // Xong luồng dữ liệu
+            }
+
+            @Override
+            public void onFailure(@NonNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Lỗi kết nối AI!", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        });
     }
 
     private void addUserMessage(String message) {
@@ -81,13 +171,15 @@ public class ChatbotFragment extends Fragment {
         scrollToBottom();
     }
 
-    private void addBotMessage(String message) {
-        if (getContext() == null) return;
+    // Đã thay đổi: Trả về đối tượng TextView để hàm bên trên có thể bắn chữ vào
+    private TextView addBotMessage(String message) {
+        if (getContext() == null) return null;
         View botView = LayoutInflater.from(getContext()).inflate(R.layout.item_chat_bot, layoutChatContainer, false);
         TextView tvMessage = botView.findViewById(R.id.tv_chat_message_bot);
         tvMessage.setText(message);
         layoutChatContainer.addView(botView);
         scrollToBottom();
+        return tvMessage;
     }
 
     private void scrollToBottom() {
