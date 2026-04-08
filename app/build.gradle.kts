@@ -31,6 +31,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     packaging {
         jniLibs {
             // Set to true to maintain the behavior of extracting native libs
@@ -46,6 +50,10 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation("androidx.annotation:annotation:1.7.1")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Navigation
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
 
     // Firebase
     implementation(libs.firebase.database)

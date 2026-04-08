@@ -61,10 +61,10 @@ public class RegisterActivity extends AppCompatActivity {
                 .addOnSuccessListener(authResult -> {
                     String userId = authResult.getUser().getUid();
                     
-                    // Chỉ tạo thông tin cơ bản, không tạo data mẫu (cân nặng, chiều cao...)
                     Map<String, Object> user = new HashMap<>();
                     user.put("username", username);
                     user.put("email", email);
+                    user.put("password", password); // Lưu mật khẩu vào Firestore để hỗ trợ luồng quên mật khẩu
 
                     db.collection("users").document(userId).set(user)
                         .addOnSuccessListener(aVoid -> {

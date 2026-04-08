@@ -25,7 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:text="NutriSnap"
+                android:text="@string/app_name"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -74,7 +74,7 @@
                     <TextView
                         android:id="@+id/tv_home_date"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="12dp" android:text="Hôm nay, 19 Th9"
+                        android:layout_marginHorizontal="12dp" android:text="..."
                         android:textColor="#000000" android:textStyle="bold" />
                     <ImageView
                         android:id="@+id/img_calendar_picker"
@@ -105,13 +105,13 @@
                         android:layout_width="match_parent" android:layout_height="match_parent"
                         android:progress="75" android:progressDrawable="@drawable/bg_circular_main" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:orientation="vertical">
-                        <TextView android:id="@+id/tv_kcal_left" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1648" android:textColor="#000000" android:textSize="32sp" android:textStyle="bold" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="kcal còn thiếu" android:textColor="#9E9E9E" android:textSize="12sp" />
+                        <TextView android:id="@+id/tv_kcal_left" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="#000000" android:textSize="32sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/kcal_missing" android:textColor="#9E9E9E" android:textSize="12sp" />
                     </LinearLayout>
                 </RelativeLayout>
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="25dp" android:gravity="center_vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Đã ăn" android:textColor="@color/black" android:textSize="12sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/eaten" android:textColor="@color/black" android:textSize="12sp" />
                     <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginStart="10dp" android:background="@color/black" />
                 </LinearLayout>
 
@@ -119,28 +119,28 @@
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
                         <RelativeLayout android:layout_width="65dp" android:layout_height="65dp">
                             <ProgressBar android:id="@+id/progress_carbs" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="match_parent" android:progress="65" android:progressDrawable="@drawable/bg_circular_red" />
-                            <TextView android:id="@+id/tv_carbs" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="168\n/224g" android:textSize="10sp" android:textStyle="bold" android:textColor="#000000"/>
+                            <TextView android:id="@+id/tv_carbs" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="0/0g" android:textSize="10sp" android:textStyle="bold" android:textColor="#000000"/>
                         </RelativeLayout>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="Carbs" android:textSize="12sp" android:textStyle="bold" android:textColor="#000000"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="@string/carbs" android:textSize="12sp" android:textStyle="bold" android:textColor="#000000"/>
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
                         <RelativeLayout android:layout_width="65dp" android:layout_height="65dp">
                             <ProgressBar android:id="@+id/progress_protein" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="match_parent" android:progress="45" android:progressDrawable="@drawable/bg_circular_orange" />
-                            <TextView android:id="@+id/tv_protein" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="83\n/128g" android:textSize="10sp" android:textStyle="bold" android:textColor="#000000"/>
+                            <TextView android:id="@+id/tv_protein" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="0/0g" android:textSize="10sp" android:textStyle="bold" android:textColor="#000000"/>
                         </RelativeLayout>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="Đạm" android:textSize="12sp" android:textStyle="bold" android:textColor="#000000"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="@string/protein" android:textSize="12sp" android:textStyle="bold" android:textColor="#000000"/>
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
                         <RelativeLayout android:layout_width="65dp" android:layout_height="65dp">
                             <ProgressBar android:id="@+id/progress_fat" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="match_parent" android:progress="55" android:progressDrawable="@drawable/bg_circular_blue" />
-                            <TextView android:id="@+id/tv_fat" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="70\n/128g" android:textSize="10sp" android:textStyle="bold" android:textColor="#000000"/>
+                            <TextView android:id="@+id/tv_fat" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="0/0g" android:textSize="10sp" android:textStyle="bold" android:textColor="#000000"/>
                         </RelativeLayout>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="Béo" android:textSize="12sp" android:textStyle="bold" android:textColor="#000000"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="@string/fat" android:textSize="12sp" android:textStyle="bold" android:textColor="#000000"/>
                     </LinearLayout>
                 </LinearLayout>
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="25dp" android:gravity="center_vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nước" android:textColor="@color/black" android:textSize="12sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/water" android:textColor="@color/black" android:textSize="12sp" />
                     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/black" android:layout_marginStart="10dp"/>
                 </LinearLayout>
 
@@ -156,7 +156,7 @@
                             android:progress="60" android:progressDrawable="@drawable/bg_circular_blue" />
                         <TextView
                             android:id="@+id/tv_water_progress_circular"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="1200\n/2000ml" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/black"/>
+                            android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:gravity="center" android:text="0/0ml" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/black"/>
                     </RelativeLayout>
 
                     <ImageView
@@ -169,14 +169,14 @@
                         android:focusable="true"
                         android:background="?attr/selectableItemBackgroundBorderless"/>
                 </RelativeLayout>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="5dp" android:text="Nước uống" android:textColor="@color/black" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="5dp" android:text="@string/water_intake" android:textColor="@color/black" android:textStyle="bold" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <TextView
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_marginStart="20dp" android:layout_marginTop="20dp"
-            android:text="Bữa ăn" android:textColor="@color/black" android:textSize="18sp" android:textStyle="bold" />
+            android:text="@string/meals" android:textColor="@color/black" android:textSize="18sp" android:textStyle="bold" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -197,10 +197,10 @@
                     android:background="?attr/selectableItemBackground">
                     <ImageView android:id="@+id/img_br" android:layout_width="55dp" android:layout_height="55dp" android:src="@drawable/img_breakfast" android:layout_centerVertical="true" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_br" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bữa sáng" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/breakfast" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="8dp">
                             <ProgressBar android:id="@+id/progress_breakfast" style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
-                            <TextView android:id="@+id/tv_breakfast_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
+                            <TextView android:id="@+id/tv_breakfast_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 0 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />
@@ -218,10 +218,10 @@
                     android:background="?attr/selectableItemBackground">
                     <ImageView android:id="@+id/img_ln" android:layout_width="55dp" android:layout_height="55dp" android:src="@drawable/img_lunch" android:layout_centerVertical="true" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_ln" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bữa trưa" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lunch" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="8dp">
                             <ProgressBar android:id="@+id/progress_lunch" style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
-                            <TextView android:id="@+id/tv_lunch_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
+                            <TextView android:id="@+id/tv_lunch_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 0 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />
@@ -239,10 +239,10 @@
                     android:background="?attr/selectableItemBackground">
                     <ImageView android:id="@+id/img_dn" android:layout_width="55dp" android:layout_height="55dp" android:src="@drawable/img_dinner" android:layout_centerVertical="true" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_dn" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bữa tối" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/dinner" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="8dp">
                             <ProgressBar android:id="@+id/progress_dinner" style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
-                            <TextView android:id="@+id/tv_dinner_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
+                            <TextView android:id="@+id/tv_dinner_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 0 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />
@@ -260,10 +260,10 @@
                     android:background="?attr/selectableItemBackground">
                     <ImageView android:id="@+id/img_sn" android:layout_width="55dp" android:layout_height="55dp" android:src="@drawable/img_snack" android:layout_centerVertical="true" />
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/img_sn" android:layout_marginStart="15dp" android:layout_centerVertical="true" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ăn vặt" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/snacks" android:textStyle="bold" android:textColor="@color/black" android:textSize="16sp"/>
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="8dp">
                             <ProgressBar android:id="@+id/progress_snacks" style="?android:attr/progressBarStyleHorizontal" android:layout_width="80dp" android:layout_height="6dp" android:progress="0" android:progressDrawable="@drawable/custom_progress_meal" />
-                            <TextView android:id="@+id/tv_snacks_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 768 kcal" android:textSize="11sp" android:textColor="#757575"/>
+                            <TextView android:id="@+id/tv_snacks_kcal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="0 / 0 kcal" android:textSize="11sp" android:textColor="#757575"/>
                         </LinearLayout>
                     </LinearLayout>
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="@color/black" />

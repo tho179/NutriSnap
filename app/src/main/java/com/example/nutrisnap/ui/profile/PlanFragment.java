@@ -105,20 +105,20 @@ public class PlanFragment extends Fragment {
         pbFat.setProgress(78);
 
         // Meal Recommendations
-        tvRecBreakfastTitle.setText("Breakfast (450 kcal)");
-        tvRecBreakfastItem1.setText("Bread");
-        tvRecBreakfastItem2.setText("egg");
+        tvRecBreakfastTitle.setText(getString(R.string.breakfast_kcal, 450));
+        tvRecBreakfastItem1.setText(R.string.bread);
+        tvRecBreakfastItem2.setText(R.string.egg);
 
-        tvRecLunchTitle.setText("Lunch (800 kcal)");
-        tvRecLunchItem1.setText("Pho");
-        tvRecLunchItem2.setText("Salad");
+        tvRecLunchTitle.setText(getString(R.string.lunch_kcal, 800));
+        tvRecLunchItem1.setText(R.string.pho);
+        tvRecLunchItem2.setText(R.string.salad);
 
-        tvRecDinnerTitle.setText("Dinner (800 kcal)");
-        tvRecDinnerItem1.setText("Brown rice");
-        tvRecDinnerItem2.setText("egg");
+        tvRecDinnerTitle.setText(getString(R.string.dinner_kcal, 800));
+        tvRecDinnerItem1.setText(R.string.brown_rice);
+        tvRecDinnerItem2.setText(R.string.egg);
 
-        tvRecSnackTitle.setText("Snack (450 kcal)");
-        tvRecSnackItem1.setText("Greek Yogurt");
-        tvRecSnackItem2.setText("Almonds");
+        tvRecSnackTitle.setText(getString(R.string.snack_kcal, 450));
+        tvRecSnackItem1.setText(R.string.greek_yogurt);
+        tvRecSnackItem2.setText(R.string.almonds);
     }
 }

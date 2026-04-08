@@ -1,0 +1,122 @@
+<resources>
+    <string name="app_name">NutriSnap</string>
+    <string name="home">Trang chủ</string>
+    <string name="chatbot">Chatbot</string>
+    <string name="insights">Phân tích</string>
+    <string name="profile">Cá nhân</string>
+
+    <!-- Home -->
+    <string name="kcal_left_unit">%s</string>
+    <string name="kcal_missing">kcal còn lại</string>
+    <string name="eaten">Đã ăn</string>
+    <string name="water">Nước</string>
+    <string name="meals">Bữa ăn</string>
+    <string name="breakfast">Bữa sáng</string>
+    <string name="lunch">Bữa trưa</string>
+    <string name="dinner">Bữa tối</string>
+    <string name="snacks">Ăn vặt</string>
+    <string name="carbs">Carbs</string>
+    <string name="protein">Đạm</string>
+    <string name="fat">Béo</string>
+    <string name="today">Hôm nay</string>
+    <string name="yesterday">Hôm qua</string>
+    <string name="water_intake">Lượng nước uống</string>
+    <string name="kcal_unit">%d kcal</string>
+    <string name="meal_kcal_format">%d / %d kcal</string>
+    <string name="nutrient_format">%d / %d g</string>
+    <string name="water_unit">%d / %d ml</string>
+
+    <!-- Profile -->
+    <string name="account">Tài khoản</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="help">Trợ giúp</string>
+    <string name="change_password">Đổi mật khẩu</string>
+    <string name="target">Mục tiêu</string>
+    <string name="plan">Kế hoạch</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="weight_display">Cân nặng: %s kg</string>
+    <string name="height_display">Chiều cao: %s cm</string>
+    <string name="edit_profile">Chỉnh sửa hồ sơ</string>
+    <string name="name">Tên</string>
+    <string name="email">Email</string>
+    <string name="phone_number">Số điện thoại</string>
+    <string name="weight_label">Cân nặng</string>
+    <string name="height_label">Chiều cao</string>
+
+    <!-- Target -->
+    <string name="target_title">Mục tiêu</string>
+    <string name="target_weight">Cân nặng mục tiêu</string>
+    <string name="lose_weight">Giảm cân</string>
+    <string name="gain_muscle">Tăng cơ</string>
+    <string name="improve_health">Cải thiện sức khỏe</string>
+    <string name="clear_skin">Đẹp da</string>
+    <string name="save">Lưu</string>
+    <string name="target_updated">Cập nhật mục tiêu thành công!</string>
+    <string name="enter_target_weight">Vui lòng nhập cân nặng mục tiêu</string>
+    <string name="select_goal">Vui lòng chọn một mục tiêu</string>
+
+    <!-- Chatbot -->
+    <string name="chatbot_welcome">Xin chào, tôi có thể giúp gì cho bạn?</string>
+    <string name="type_message">Nhập tin nhắn...</string>
+
+    <!-- Meal details -->
+    <string name="scan_meal">Quét món ăn</string>
+    <string name="take_photo">Chụp ảnh</string>
+    <string name="choose_from_gallery">Chọn từ thư viện</string>
+    <string name="recognizing_food">Đang nhận diện món ăn...</string>
+    <string name="save_meal_success">Lưu bữa ăn thành công!</string>
+    <string name="add_at_least_one_food">Vui lòng thêm ít nhất một món ăn</string>
+    <string name="delete_confirmation">Bạn có chắc chắn muốn xóa không?</string>
+
+    <!-- Plan -->
+    <string name="plan_title">Kế hoạch</string>
+    <string name="daily_target">Mục tiêu hàng ngày</string>
+    <string name="kcal_per_day">kcal/ngày</string>
+    <string name="daily_nutrition_progress">Tiến độ dinh dưỡng hàng ngày</string>
+    <string name="calories">Calo</string>
+    <string name="meal_recommendation">Gợi ý bữa ăn</string>
+    <string name="breakfast_kcal">Bữa sáng (%d kcal)</string>
+    <string name="lunch_kcal">Bữa trưa (%d kcal)</string>
+    <string name="dinner_kcal">Bữa tối (%d kcal)</string>
+    <string name="snack_kcal">Ăn vặt (%d kcal)</string>
+    <string name="bread">Bánh mì</string>
+    <string name="egg">trứng</string>
+    <string name="pho">Phở</string>
+    <string name="salad">Salad</string>
+    <string name="brown_rice">Gạo lứt</string>
+    <string name="greek_yogurt">Sữa chua Hy Lạp</string>
+    <string name="almonds">Hạnh nhân</string>
+
+    <!-- Help -->
+    <string name="help_update_profile">Làm thế nào để cập nhật hồ sơ?</string>
+    <string name="help_change_password">Làm thế nào để đổi mật khẩu?</string>
+    <string name="help_contact_support">Liên hệ hỗ trợ</string>
+    <string name="help_update_profile_desc">Đi tới Tài khoản > Cá nhân. Nhấn vào tên hoặc ảnh đại diện để chỉnh sửa các thông tin như chiều cao, cân nặng và tên của bạn.</string>
+    <string name="help_change_password_desc">Đi tới Tài khoản > Đổi mật khẩu. Bạn sẽ cần nhập mật khẩu hiện tại để đặt mật khẩu mới.</string>
+    <string name="help_contact_support_desc">Bạn có thể liên hệ với đội ngũ hỗ trợ của chúng tôi qua email tại support@nutrisnap.com hoặc gọi cho chúng tôi theo số +1 234 567 890.</string>
+
+    <!-- Insights -->
+    <string name="weekly">Hàng tuần</string>
+    <string name="monthly">Hàng tháng</string>
+    <string name="yearly">Hàng năm</string>
+    <string name="calorie_kcal">Năng lượng (kcal)</string>
+    <string name="selected">Đã chọn</string>
+    <string name="calorie_intake_goal">Mục tiêu calo nạp vào</string>
+    <string name="protein_carb_fat">Đạm/Carb/Béo</string>
+    <string name="weight">Cân nặng</string>
+    <string name="update">Cập nhật</string>
+
+    <!-- Change Password -->
+    <string name="secure_your_account">Bảo mật tài khoản của bạn 🔒</string>
+    <string name="secure_account_desc">Bảo mật tài khoản của bạn là ưu tiên hàng đầu của chúng tôi. Vui lòng tạo mật khẩu mới bằng cách kết hợp chữ cái, số và ký hiệu.</string>
+    <string name="create_new_password">Tạo mật khẩu mới</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="enter_new_password_toast">Vui lòng nhập mật khẩu mới</string>
+    <string name="passwords_do_not_match">Mật khẩu xác nhận không khớp</string>
+    <string name="password_length_error">Mật khẩu phải từ 6 ký tự trở lên</string>
+    <string name="password_updated_success">Cập nhật mật khẩu thành công!</string>
+    <string name="account_not_found">Không tìm thấy tài khoản với email này</string>
+    <string name="query_error">Lỗi truy vấn: %s</string>
+    <string name="email_info_not_found">Không tìm thấy thông tin email!</string>
+    <string name="update_error">Lỗi cập nhật: %s</string>
+</resources>

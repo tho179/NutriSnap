@@ -28,18 +28,15 @@ public class HelpFragment extends Fragment {
         btnBack.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
 
         tvUpdateProfile.setOnClickListener(v -> {
-            String content = "Navigate to <b>Account > Profile</b>. Tap on your name or avatar to edit your details like height, weight, and name.";
-            navigateToDetail(content);
+            navigateToDetail(getString(R.string.help_update_profile_desc));
         });
 
         tvChangePassword.setOnClickListener(v -> {
-            String content = "Navigate to <b>Account > Change password</b>. You will need to enter your current password to set a new one.";
-            navigateToDetail(content);
+            navigateToDetail(getString(R.string.help_change_password_desc));
         });
 
         tvContactSupport.setOnClickListener(v -> {
-            String content = "You can contact our support team via email at <b>support@nutrisnap.com</b> or call us at <b>+1 234 567 890</b>.";
-            navigateToDetail(content);
+            navigateToDetail(getString(R.string.help_contact_support_desc));
         });
 
         return view;

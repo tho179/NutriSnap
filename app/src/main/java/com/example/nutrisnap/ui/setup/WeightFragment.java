@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.example.nutrisnap.R;
 
-public class WeightFragment extends Fragment {
+public class WeightFragment extends Fragment implements SetupProfileActivity.SetupDataInterface {
 
     private TextView tvUnitKg, tvUnitLb;
     private EditText etWeight;
@@ -39,33 +39,35 @@ public class WeightFragment extends Fragment {
     private void selectUnit(boolean isKg) {
         isKgSelected = isKg;
         if (isKg) {
-            // kg selected
             tvUnitKg.setBackgroundResource(R.drawable.bg_button_green);
             tvUnitKg.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
-            
             tvUnitLb.setBackgroundResource(R.drawable.bg_unit_toggle);
             tvUnitLb.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-            
             etWeight.setHint("70");
         } else {
-            // lb selected
             tvUnitLb.setBackgroundResource(R.drawable.bg_button_green);
             tvUnitLb.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
-            
             tvUnitKg.setBackgroundResource(R.drawable.bg_unit_toggle);
             tvUnitKg.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-            
             etWeight.setHint("154");
         }
-        // Xóa text cũ khi chuyển đơn vị để tránh nhầm lẫn
-        etWeight.setText("");
     }
 
-    public boolean isKgSelected() {
-        return isKgSelected;
-    }
-
-    public String getWeightValue() {
-        return etWeight.getText().toString();
+    @Override
+    public void saveData() {
+        if (etWeight != null) {
+            String weightStr = etWeight.getText().toString().trim();
+            if (!weightStr.isEmpty()) {
+                try {
+                    double weight = Double.parseDouble(weightStr);
+                    if (!isKgSelected) {
+                        weight = weight * 0.453592; // lbs to kg
+                    }
+                    ((SetupProfileActivity) requireActivity()).updateUserField("currentWeight", weight);
+                } catch (NumberFormatException e) {
+                    // Ignore
+                }
+            }
+        }
     }
 }

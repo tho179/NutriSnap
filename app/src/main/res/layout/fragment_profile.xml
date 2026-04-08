@@ -31,7 +31,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="Account"
+                android:text="@string/account"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -139,7 +139,7 @@
 
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp">
                 <ImageView android:id="@+id/ic_lang" android:layout_width="22dp" android:layout_height="22dp" android:layout_centerVertical="true" android:src="@drawable/ic_globe" app:tint="#4CAF50" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_lang" android:text="Language" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_lang" android:text="@string/language" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                 <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="#424242" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
@@ -155,7 +155,7 @@
 
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp">
                 <ImageView android:id="@+id/ic_help" android:layout_width="22dp" android:layout_height="22dp" android:layout_centerVertical="true" android:src="@drawable/ic_phone" app:tint="#2196F3" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_help" android:text="Help" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_help" android:text="@string/help" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                 <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="#424242" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
@@ -171,7 +171,7 @@
 
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp">
                 <ImageView android:id="@+id/ic_pass" android:layout_width="22dp" android:layout_height="22dp" android:layout_centerVertical="true" android:src="@drawable/ic_key" app:tint="#FFC107" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_pass" android:text="Change password" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_pass" android:text="@string/change_password" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                 <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="#424242" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
@@ -187,7 +187,7 @@
 
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp">
                 <ImageView android:id="@+id/ic_target" android:layout_width="22dp" android:layout_height="22dp" android:layout_centerVertical="true" android:src="@drawable/ic_target" app:tint="#F44336" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_target" android:text="Target" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_target" android:text="@string/target" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                 <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="#424242" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
@@ -203,7 +203,7 @@
 
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp">
                 <ImageView android:id="@+id/ic_plan" android:layout_width="22dp" android:layout_height="22dp" android:layout_centerVertical="true" android:src="@drawable/ic_plan_check" app:tint="#E91E63" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_plan" android:text="Plan" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="15dp" android:layout_toEndOf="@id/ic_plan" android:text="@string/plan" android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                 <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_arrow_right" app:tint="#424242" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
@@ -215,7 +215,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginBottom="20dp"
             android:backgroundTint="#4CAF50"
-            android:text="Log out"
+            android:text="@string/logout"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="16sp"

@@ -17,7 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
 import com.example.nutrisnap.R;
 import com.example.nutrisnap.auth.ChangePasswordActivity;
 import com.example.nutrisnap.auth.LoginActivity;
@@ -31,6 +31,7 @@ public class ProfileFragment extends Fragment {
     private FirebaseFirestore db;
     
     private TextView tvName, tvEmail, tvWeight, tvHeight;
+    private String userEmail;
 
     @Nullable
     @Override
@@ -57,15 +58,20 @@ public class ProfileFragment extends Fragment {
         // Lấy dữ liệu từ Firebase
         loadUserData();
 
-        cardProfileInfo.setOnClickListener(v -> navigateToFragment(new EditProfileFragment()));
-        btnLanguage.setOnClickListener(v -> navigateToFragment(new LanguageFragment()));
-        btnHelp.setOnClickListener(v -> navigateToFragment(new HelpFragment()));
-        btnTarget.setOnClickListener(v -> navigateToFragment(new TargetFragment()));
-        btnPlan.setOnClickListener(v -> navigateToFragment(new PlanFragment()));
+        cardProfileInfo.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.nav_edit_profile));
+        btnLanguage.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.nav_language));
+        btnHelp.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.nav_help));
+        btnTarget.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.nav_target));
+        btnPlan.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.nav_plan));
 
         btnPassword.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), ChangePasswordActivity.class);
-            startActivity(intent);
+            if (userEmail != null && !userEmail.isEmpty()) {
+                Intent intent = new Intent(getActivity(), ChangePasswordActivity.class);
+                intent.putExtra("email", userEmail);
+                startActivity(intent);
+            } else {
+                Toast.makeText(getContext(), "Đang tải thông tin người dùng, vui lòng thử lại sau", Toast.LENGTH_SHORT).show();
+            }
         });
 
         btnLogout.setOnClickListener(v -> showLogoutDialog());
@@ -85,14 +91,22 @@ public class ProfileFragment extends Fragment {
                     Double weight = documentSnapshot.getDouble("currentWeight");
                     Double height = documentSnapshot.getDouble("currentHeight");
 
+                    userEmail = email;
                     tvName.setText(name != null ? name : "N/A");
                     tvEmail.setText(email != null ? email : "N/A");
-                    tvWeight.setText("Weight: " + (weight != null ? weight : "--") + " kg");
-                    tvHeight.setText("Height: " + (height != null ? height : "--") + " cm");
+                    
+                    // Sử dụng string resource để hỗ trợ đa ngôn ngữ
+                    String weightVal = (weight != null) ? String.valueOf(weight) : "--";
+                    String heightVal = (height != null) ? String.valueOf(height) : "--";
+                    
+                    tvWeight.setText(getString(R.string.weight_display, weightVal));
+                    tvHeight.setText(getString(R.string.height_display, heightVal));
                 }
             })
             .addOnFailureListener(e -> {
-                Toast.makeText(getContext(), "Lỗi tải thông tin: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                if (isAdded()) {
+                    Toast.makeText(getContext(), getString(R.string.load_data_error) + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             });
     }
 
@@ -120,13 +134,5 @@ public class ProfileFragment extends Fragment {
         });
 
         dialog.show();
-    }
-
-    private void navigateToFragment(Fragment fragment) {
-        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right);
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
     }
 }

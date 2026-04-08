@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Target"
+            android:text="@string/target_title"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -47,7 +47,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Target weight"
+                android:text="@string/target_weight"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -86,7 +86,7 @@
                         android:src="@drawable/ic_goal_lose_weight" />
                     <TextView
                         style="@style/GoalTextStyle"
-                        android:text="Lose Weight" />
+                        android:text="@string/lose_weight" />
                     <ImageView
                         android:id="@+id/iv_check_target_lose_weight"
                         android:layout_width="24dp"
@@ -105,7 +105,7 @@
                         android:src="@drawable/ic_goal_gain_muscle" />
                     <TextView
                         style="@style/GoalTextStyle"
-                        android:text="Gain Muscle" />
+                        android:text="@string/gain_muscle" />
                     <ImageView
                         android:id="@+id/iv_check_target_gain_muscle"
                         android:layout_width="24dp"
@@ -124,7 +124,7 @@
                         android:src="@drawable/ic_goal_improve_health" />
                     <TextView
                         style="@style/GoalTextStyle"
-                        android:text="Improve Health" />
+                        android:text="@string/improve_health" />
                     <ImageView
                         android:id="@+id/iv_check_target_improve_health"
                         android:layout_width="24dp"
@@ -143,7 +143,7 @@
                         android:src="@drawable/ic_goal_clear_skin" />
                     <TextView
                         style="@style/GoalTextStyle"
-                        android:text="Clear skin" />
+                        android:text="@string/clear_skin" />
                     <ImageView
                         android:id="@+id/iv_check_target_clear_skin"
                         android:layout_width="24dp"
@@ -163,7 +163,7 @@
         android:layout_marginHorizontal="30dp"
         android:layout_marginBottom="40dp"
         android:background="@drawable/bg_button_green"
-        android:text="Save"
+        android:text="@string/save"
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="18sp"

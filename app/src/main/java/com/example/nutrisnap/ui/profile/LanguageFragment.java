@@ -1,5 +1,6 @@
 package com.example.nutrisnap.ui.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,14 +13,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+import com.example.nutrisnap.MainActivity;
 import com.example.nutrisnap.R;
+import com.example.nutrisnap.utils.LocaleHelper;
 
 public class LanguageFragment extends Fragment {
 
-    private String selectedLanguage = "English";
+    private String selectedLanguageCode = "en";
+    private String selectedLanguageName = "English";
     private TextView tvHeaderTitle;
-    private ImageView imgCheckEn, imgCheckVi, imgCheckJa;
-    private TextView tvLangEn, tvLangVi, tvLangJa;
+    private ImageView imgCheckEn, imgCheckVi;
+    private TextView tvLangEn, tvLangVi;
 
     @Nullable
     @Override
@@ -29,56 +34,64 @@ public class LanguageFragment extends Fragment {
         tvHeaderTitle = view.findViewById(R.id.tv_language_title);
         imgCheckEn = view.findViewById(R.id.img_check_en);
         imgCheckVi = view.findViewById(R.id.img_check_vi);
-        imgCheckJa = view.findViewById(R.id.img_check_ja);
         
         tvLangEn = view.findViewById(R.id.tv_lang_en);
         tvLangVi = view.findViewById(R.id.tv_lang_vi);
-        tvLangJa = view.findViewById(R.id.tv_lang_ja);
 
         RelativeLayout layoutEn = view.findViewById(R.id.layout_lang_en);
         RelativeLayout layoutVi = view.findViewById(R.id.layout_lang_vi);
-        RelativeLayout layoutJa = view.findViewById(R.id.layout_lang_ja);
         
         ImageView btnBack = view.findViewById(R.id.btn_back_language);
         AppCompatButton btnSave = view.findViewById(R.id.btn_save_language);
 
-        layoutEn.setOnClickListener(v -> updateSelection("English"));
-        layoutVi.setOnClickListener(v -> updateSelection("Tiếng Việt"));
-        layoutJa.setOnClickListener(v -> updateSelection("日本語 (Japanese)"));
+        // Khởi tạo trạng thái tick dựa trên ngôn ngữ đang sử dụng
+        String currentLang = LocaleHelper.getLanguage(requireContext());
+        if (currentLang.equals("vi")) {
+            updateSelection("vi", getString(R.string.lang_vi));
+        } else {
+            updateSelection("en", getString(R.string.lang_en));
+        }
 
-        btnBack.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
+        layoutEn.setOnClickListener(v -> updateSelection("en", getString(R.string.lang_en)));
+        layoutVi.setOnClickListener(v -> updateSelection("vi", getString(R.string.lang_vi)));
+
+        btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
         btnSave.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Language saved: " + selectedLanguage, Toast.LENGTH_SHORT).show();
-            requireActivity().getSupportFragmentManager().popBackStack();
+            // Thay đổi ngôn ngữ hệ thống
+            LocaleHelper.setLocale(requireContext(), selectedLanguageCode);
+            
+            Toast.makeText(requireContext(), getString(R.string.language_changed, selectedLanguageName), Toast.LENGTH_SHORT).show();
+            
+            // Khởi động lại Activity chính để áp dụng ngôn ngữ mới cho toàn bộ App
+            Intent intent = new Intent(requireActivity(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            requireActivity().finish();
         });
 
         return view;
     }
 
-    private void updateSelection(String lang) {
-        selectedLanguage = lang;
-        tvHeaderTitle.setText(lang);
+    private void updateSelection(String code, String name) {
+        selectedLanguageCode = code;
+        selectedLanguageName = name;
+        tvHeaderTitle.setText(name);
 
         // Reset all
         imgCheckEn.setVisibility(View.GONE);
         imgCheckVi.setVisibility(View.GONE);
-        imgCheckJa.setVisibility(View.GONE);
         
         tvLangEn.setTypeface(null, android.graphics.Typeface.NORMAL);
         tvLangVi.setTypeface(null, android.graphics.Typeface.NORMAL);
-        tvLangJa.setTypeface(null, android.graphics.Typeface.NORMAL);
 
         // Set selected
-        if (lang.equals("English")) {
+        if (code.equals("en")) {
             imgCheckEn.setVisibility(View.VISIBLE);
             tvLangEn.setTypeface(null, android.graphics.Typeface.BOLD);
-        } else if (lang.equals("Tiếng Việt")) {
+        } else if (code.equals("vi")) {
             imgCheckVi.setVisibility(View.VISIBLE);
             tvLangVi.setTypeface(null, android.graphics.Typeface.BOLD);
-        } else if (lang.equals("日本語 (Japanese)")) {
-            imgCheckJa.setVisibility(View.VISIBLE);
-            tvLangJa.setTypeface(null, android.graphics.Typeface.BOLD);
         }
     }
 }

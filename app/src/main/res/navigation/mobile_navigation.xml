@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.nutrisnap.ui.home.HomeFragment"
+        android:label="@string/home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_chatbot"
+        android:name="com.example.nutrisnap.ui.chatbot.ChatbotFragment"
+        android:label="@string/chatbot"
+        tools:layout="@layout/fragment_chatbot" />
+
+    <fragment
+        android:id="@+id/nav_insights"
+        android:name="com.example.nutrisnap.ui.report.InsightsFragment"
+        android:label="@string/insights"
+        tools:layout="@layout/fragment_insights" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.nutrisnap.ui.profile.ProfileFragment"
+        android:label="@string/profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/nav_language"
+        android:name="com.example.nutrisnap.ui.profile.LanguageFragment"
+        android:label="Language"
+        tools:layout="@layout/fragment_language" />
+
+    <fragment
+        android:id="@+id/nav_edit_profile"
+        android:name="com.example.nutrisnap.ui.profile.EditProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_edit_profile" />
+
+    <fragment
+        android:id="@+id/nav_help"
+        android:name="com.example.nutrisnap.ui.profile.HelpFragment"
+        android:label="Help"
+        tools:layout="@layout/fragment_help" />
+
+    <fragment
+        android:id="@+id/nav_target"
+        android:name="com.example.nutrisnap.ui.profile.TargetFragment"
+        android:label="Target"
+        tools:layout="@layout/fragment_target" />
+
+    <fragment
+        android:id="@+id/nav_plan"
+        android:name="com.example.nutrisnap.ui.profile.PlanFragment"
+        android:label="Plan"
+        tools:layout="@layout/fragment_plan" />
+
+    <fragment
+        android:id="@+id/nav_notification"
+        android:name="com.example.nutrisnap.ui.notification.NotificationFragment"
+        android:label="Notification"
+        tools:layout="@layout/fragment_notification" />
+
+    <fragment
+        android:id="@+id/nav_breakfast"
+        android:name="com.example.nutrisnap.ui.home.BreakfastFragment"
+        android:label="Breakfast"
+        tools:layout="@layout/fragment_breakfast_detail" />
+
+    <fragment
+        android:id="@+id/nav_lunch"
+        android:name="com.example.nutrisnap.ui.home.LunchFragment"
+        android:label="Lunch"
+        tools:layout="@layout/fragment_lunch_detail" />
+
+    <fragment
+        android:id="@+id/nav_dinner"
+        android:name="com.example.nutrisnap.ui.home.DinnerFragment"
+        android:label="Dinner"
+        tools:layout="@layout/fragment_dinner_detail" />
+
+    <fragment
+        android:id="@+id/nav_snacks"
+        android:name="com.example.nutrisnap.ui.home.SnacksFragment"
+        android:label="Snacks"
+        tools:layout="@layout/fragment_snacks_detail" />
+
+    <fragment
+        android:id="@+id/nav_photo_selection"
+        android:name="com.example.nutrisnap.ui.profile.PhotoSelectionFragment"
+        android:label="Select Photo"
+        tools:layout="@layout/fragment_photo_selection" />
+
+    <fragment
+        android:id="@+id/nav_photo_adjustment"
+        android:name="com.example.nutrisnap.ui.profile.PhotoAdjustmentFragment"
+        android:label="Adjust Photo"
+        tools:layout="@layout/fragment_photo_adjustment" />
+
+    <fragment
+        android:id="@+id/nav_help_detail"
+        android:name="com.example.nutrisnap.ui.profile.HelpDetailFragment"
+        android:label="Help Detail"
+        tools:layout="@layout/fragment_help_detail" />
+
+</navigation>
