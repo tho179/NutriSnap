@@ -107,4 +107,10 @@
         android:label="Help Detail"
         tools:layout="@layout/fragment_help_detail" />
 
+    <fragment
+        android:id="@+id/nav_analysis"
+        android:name="com.example.nutrisnap.ui.home.AnalysisFragment"
+        android:label="Analysis"
+        tools:layout="@layout/fragment_analysis" />
+
 </navigation>

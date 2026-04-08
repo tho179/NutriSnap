@@ -1,11 +1,9 @@
 package com.example.nutrisnap.ui.profile;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,14 +12,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nutrisnap.R;
@@ -31,19 +27,13 @@ import java.util.List;
 public class PhotoSelectionFragment extends Fragment {
 
     private Uri imageUri;
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    openCamera();
-                } else {
-                    Toast.makeText(getContext(), "Camera permission denied", Toast.LENGTH_SHORT).show();
-                }
-            });
 
     private final ActivityResultLauncher<Intent> cameraLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK) {
-                    navigateToAdjustment(imageUri);
+                    if (getView() != null) {
+                        navigateToAdjustment(getView(), imageUri);
+                    }
                 }
             });
 
@@ -56,14 +46,10 @@ public class PhotoSelectionFragment extends Fragment {
         ImageView btnTakePhoto = view.findViewById(R.id.btn_take_photo);
         RecyclerView rvPhotos = view.findViewById(R.id.rv_photos);
 
-        btnBack.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
+        btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
         btnTakePhoto.setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                openCamera();
-            } else {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA);
-            }
+            openCamera();
         });
 
         rvPhotos.setLayoutManager(new GridLayoutManager(getContext(), 2));
@@ -85,18 +71,10 @@ public class PhotoSelectionFragment extends Fragment {
         cameraLauncher.launch(intent);
     }
 
-    private void navigateToAdjustment(Uri uri) {
-        PhotoAdjustmentFragment adjustmentFragment = PhotoAdjustmentFragment.newInstance(uri);
-        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(
-                R.anim.slide_in_right,
-                R.anim.slide_out_left,
-                R.anim.slide_in_left,
-                R.anim.slide_out_right
-        );
-        transaction.replace(R.id.fragment_container, adjustmentFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+    private void navigateToAdjustment(View view, Uri uri) {
+        Bundle args = new Bundle();
+        args.putParcelable("image_uri", uri);
+        Navigation.findNavController(view).navigate(R.id.nav_photo_adjustment, args);
     }
 
     private List<Uri> getGalleryPhotos(Context context) {
@@ -137,7 +115,7 @@ public class PhotoSelectionFragment extends Fragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             holder.imgPhoto.setImageURI(photos.get(position));
             holder.itemView.setOnClickListener(v -> {
-                navigateToAdjustment(photos.get(position));
+                navigateToAdjustment(v, photos.get(position));
             });
         }
 

@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import com.example.nutrisnap.R;
 import com.example.nutrisnap.model.FoodItem;
 import com.example.nutrisnap.model.MealRecord;
@@ -24,22 +25,6 @@ public class AnalysisFragment extends Fragment {
     private int quantity = 1;
 
     private FoodItem currentFood;
-
-    public static AnalysisFragment newInstance(Uri imageUri, MealRecord mealRecord) {
-        AnalysisFragment fragment = new AnalysisFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(ARG_IMAGE_URI, imageUri);
-        if (mealRecord.getFoods() != null && !mealRecord.getFoods().isEmpty()) {
-            FoodItem firstFood = mealRecord.getFoods().get(0);
-            args.putString("food_name", firstFood.getName());
-            args.putInt("food_kcal", (int) firstFood.getCalories());
-            args.putDouble("food_protein", firstFood.getProtein());
-            args.putDouble("food_carbs", firstFood.getCarbs());
-            args.putDouble("food_fat", firstFood.getFat());
-        }
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,7 +78,7 @@ public class AnalysisFragment extends Fragment {
         }
 
         if (btnBack != null) {
-            btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+            btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
         }
 
         if (btnPlus != null) {
@@ -125,7 +110,7 @@ public class AnalysisFragment extends Fragment {
             result.putParcelable("food_image", imageUri);
             
             getParentFragmentManager().setFragmentResult("add_food_request", result);
-            getParentFragmentManager().popBackStack();
+            Navigation.findNavController(v).popBackStack();
         });
 
         return view;

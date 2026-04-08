@@ -2,11 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -31,7 +36,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Login as the Launcher Activity -->
         <activity
             android:name=".auth.LoginActivity"
             android:exported="true">
@@ -41,34 +45,13 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".auth.RegisterActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".auth.ForgotPasswordActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".auth.VerifyOtpActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".auth.ChangePasswordActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".auth.NotificationSuccessActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".auth.WelcomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.setup.SetupProfileActivity"
-            android:exported="false" />
-
+        <activity android:name=".auth.RegisterActivity" android:exported="false" />
+        <activity android:name=".auth.ForgotPasswordActivity" android:exported="false" />
+        <activity android:name=".auth.VerifyOtpActivity" android:exported="false" />
+        <activity android:name=".auth.ChangePasswordActivity" android:exported="false" />
+        <activity android:name=".auth.NotificationSuccessActivity" android:exported="false" />
+        <activity android:name=".auth.WelcomeActivity" android:exported="false" />
+        <activity android:name=".ui.setup.SetupProfileActivity" android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:windowSoftInputMode="adjustResize"

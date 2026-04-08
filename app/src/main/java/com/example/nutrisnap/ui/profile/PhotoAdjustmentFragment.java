@@ -10,20 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import com.example.nutrisnap.R;
 
 public class PhotoAdjustmentFragment extends Fragment {
 
     private static final String ARG_IMAGE_URI = "image_uri";
     private Uri imageUri;
-
-    public static PhotoAdjustmentFragment newInstance(Uri uri) {
-        PhotoAdjustmentFragment fragment = new PhotoAdjustmentFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(ARG_IMAGE_URI, uri);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Nullable
     @Override
@@ -43,22 +36,19 @@ public class PhotoAdjustmentFragment extends Fragment {
             imgPreview.setImageURI(imageUri);
         }
 
-        btnBack.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
+        btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
         btnRetake.setOnClickListener(v -> {
-            // Quay lại màn hình chọn ảnh/chụp ảnh
-            requireActivity().getSupportFragmentManager().popBackStack();
+            Navigation.findNavController(v).popBackStack();
         });
 
         btnSaveHeader.setOnClickListener(v -> {
-            // Gửi kết quả về EditProfileFragment
             Bundle result = new Bundle();
             result.putParcelable("selected_avatar_uri", imageUri);
             getParentFragmentManager().setFragmentResult("avatar_request", result);
             
-            // Quay về EditProfileFragment (bỏ qua PhotoSelectionFragment)
-            requireActivity().getSupportFragmentManager().popBackStack();
-            requireActivity().getSupportFragmentManager().popBackStack();
+            // Navigate back to Edit Profile (pop Adjustment and Selection)
+            Navigation.findNavController(v).popBackStack(R.id.nav_edit_profile, false);
         });
 
         return view;

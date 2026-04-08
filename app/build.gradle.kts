@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.example.nutrisnap"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -68,6 +68,7 @@ dependencies {
 
     // Google AI Gemini
     implementation(libs.google.generativeai)
+    implementation(libs.androidx.navigation.runtime)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

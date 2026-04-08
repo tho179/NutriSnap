@@ -1,12 +1,10 @@
 package com.example.nutrisnap.ui.home;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -24,10 +22,9 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
 import com.example.nutrisnap.R;
 import com.example.nutrisnap.controller.MealController;
 import com.example.nutrisnap.model.AIOnResultListener;
@@ -55,7 +52,6 @@ public abstract class BaseMealFragment extends Fragment {
     private String currentPhotoPath;
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
-    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,17 +77,6 @@ public abstract class BaseMealFragment extends Fragment {
                     }
                 }
         );
-
-        requestCameraPermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(),
-                isGranted -> {
-                    if (isGranted) {
-                        openCamera();
-                    } else {
-                        Toast.makeText(getContext(), "Quyền camera bị từ chối", Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
     }
 
     protected void setupBaseViews(View view) {
@@ -101,7 +86,7 @@ public abstract class BaseMealFragment extends Fragment {
         layoutFoodList = view.findViewById(R.id.layout_food_list);
 
         if (btnBack != null) {
-            btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+            btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
         }
 
         if (btnScan != null) {
@@ -143,15 +128,11 @@ public abstract class BaseMealFragment extends Fragment {
         tvKcal.setText(String.format(Locale.getDefault(), "%d kcal", (int)foodItem.getCalories()));
         if (imageUri != null) imgFood.setImageURI(imageUri);
 
-        // Chuyển sang Analysis khi nhấn vào món ăn
         itemView.setOnClickListener(v -> {
             MealRecord singleMeal = new MealRecord(getMealType(), System.currentTimeMillis(), Collections.singletonList(foodItem));
-            // Trước khi đi, xóa món cũ để tránh trùng lặp khi quay lại (nếu người dùng nhấn Add)
-            // Hoặc có thể dùng logic update thay vì add mới. Ở đây ta đơn giản là cho phép view/edit.
-            // Để đơn giản, ta xóa nó khỏi danh sách hiện tại, và AnalysisFragment sẽ gửi lại item mới.
             layoutFoodList.removeView(itemView);
             currentFoodList.remove(foodItem);
-            onImageAnalyzed(imageUri, singleMeal);
+            onImageAnalyzed(v, imageUri, singleMeal);
         });
 
         btnDelete.setOnClickListener(v -> {
@@ -183,7 +164,10 @@ public abstract class BaseMealFragment extends Fragment {
             @Override
             public void onSuccess() {
                 Toast.makeText(getContext(), "Lưu bữa ăn thành công!", Toast.LENGTH_SHORT).show();
-                getParentFragmentManager().popBackStack();
+                // We don't have a view here, but we can try getting it from fragment view
+                if (getView() != null) {
+                    Navigation.findNavController(getView()).popBackStack();
+                }
             }
 
             @Override
@@ -208,12 +192,6 @@ public abstract class BaseMealFragment extends Fragment {
     }
 
     private void openCamera() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
-            return;
-        }
-
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         File photoFile = null;
         try {
@@ -256,7 +234,9 @@ public abstract class BaseMealFragment extends Fragment {
                 @Override
                 public void onSuccess(MealRecord mealRecord) {
                     progressDialog.dismiss();
-                    onImageAnalyzed(uri, mealRecord);
+                    if (getView() != null) {
+                        onImageAnalyzed(getView(), uri, mealRecord);
+                    }
                 }
 
                 @Override
@@ -285,13 +265,18 @@ public abstract class BaseMealFragment extends Fragment {
         return tempFile;
     }
 
-    protected void onImageAnalyzed(Uri imageUri, MealRecord mealRecord) {
-        AnalysisFragment analysisFragment = AnalysisFragment.newInstance(imageUri, mealRecord);
-        getParentFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, analysisFragment)
-                .addToBackStack(null)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .commit();
+    protected void onImageAnalyzed(View view, Uri imageUri, MealRecord mealRecord) {
+        Bundle args = new Bundle();
+        args.putParcelable("image_uri", imageUri);
+        if (mealRecord.getFoods() != null && !mealRecord.getFoods().isEmpty()) {
+            FoodItem firstFood = mealRecord.getFoods().get(0);
+            args.putString("food_name", firstFood.getName());
+            args.putInt("food_kcal", (int) firstFood.getCalories());
+            args.putDouble("food_protein", firstFood.getProtein());
+            args.putDouble("food_carbs", firstFood.getCarbs());
+            args.putDouble("food_fat", firstFood.getFat());
+        }
+        Navigation.findNavController(view).navigate(R.id.nav_analysis, args);
     }
 
     protected void showDeleteConfirmationDialog(Runnable onConfirm) {
