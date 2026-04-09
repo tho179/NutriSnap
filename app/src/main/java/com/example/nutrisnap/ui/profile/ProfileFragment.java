@@ -18,11 +18,12 @@ import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+
+import com.bumptech.glide.Glide;
 import com.example.nutrisnap.R;
 import com.example.nutrisnap.auth.ChangePasswordActivity;
 import com.example.nutrisnap.auth.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileFragment extends Fragment {
@@ -31,6 +32,7 @@ public class ProfileFragment extends Fragment {
     private FirebaseFirestore db;
     
     private TextView tvName, tvEmail, tvWeight, tvHeight;
+    private ImageView imgAvatar;
     private String userEmail;
 
     @Nullable
@@ -46,6 +48,7 @@ public class ProfileFragment extends Fragment {
         tvEmail = view.findViewById(R.id.tv_profile_email);
         tvWeight = view.findViewById(R.id.tv_profile_weight);
         tvHeight = view.findViewById(R.id.tv_profile_height);
+        imgAvatar = view.findViewById(R.id.img_avatar);
 
         CardView cardProfileInfo = view.findViewById(R.id.card_profile_info);
         CardView btnLanguage = view.findViewById(R.id.btn_menu_language);
@@ -88,19 +91,23 @@ public class ProfileFragment extends Fragment {
                 if (documentSnapshot.exists()) {
                     String name = documentSnapshot.getString("username");
                     String email = documentSnapshot.getString("email");
-                    Double weight = documentSnapshot.getDouble("currentWeight");
-                    Double height = documentSnapshot.getDouble("currentHeight");
+                    Double weight = documentSnapshot.getDouble("weight");
+                    Double height = documentSnapshot.getDouble("height");
+                    String avatarUrl = documentSnapshot.getString("avatarUrl");
 
                     userEmail = email;
                     tvName.setText(name != null ? name : "N/A");
                     tvEmail.setText(email != null ? email : "N/A");
                     
-                    // Sử dụng string resource để hỗ trợ đa ngôn ngữ
                     String weightVal = (weight != null) ? String.valueOf(weight) : "--";
                     String heightVal = (height != null) ? String.valueOf(height) : "--";
                     
                     tvWeight.setText(getString(R.string.weight_display, weightVal));
                     tvHeight.setText(getString(R.string.height_display, heightVal));
+
+                    if (avatarUrl != null && !avatarUrl.isEmpty() && isAdded()) {
+                        Glide.with(this).load(avatarUrl).placeholder(R.drawable.img_avatar_placeholder).into(imgAvatar);
+                    }
                 }
             })
             .addOnFailureListener(e -> {

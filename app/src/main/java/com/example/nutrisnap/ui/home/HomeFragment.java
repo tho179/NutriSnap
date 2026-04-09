@@ -45,6 +45,7 @@ public class HomeFragment extends Fragment {
     private DailyController dailyController;
     private String currentUserId;
     private String currentDateStr;
+    private String lastWarningDate = "";
 
     @Nullable
     @Override
@@ -132,7 +133,28 @@ public class HomeFragment extends Fragment {
             public void onSuccess(DailySummaryData data) {
                 if (!isAdded()) return;
 
-                if(tvKcalLeft != null) tvKcalLeft.setText(String.valueOf(data.kcalLeft));
+                if(tvKcalLeft != null) {
+                    if (data.totalCaloriesIn > data.targetCalories) {
+                        int exceeded = data.totalCaloriesIn - data.targetCalories;
+                        tvKcalLeft.setText("-" + exceeded);
+                        tvKcalLeft.setTextColor(Color.RED);
+                        
+                        // Hiển thị cảnh báo 1 lần cho mỗi ngày
+                        if (!currentDateStr.equals(lastWarningDate)) {
+                            Toast.makeText(getContext(), "Cảnh báo: Bạn đã ăn vượt " + exceeded + " kcal mục tiêu trong ngày!", Toast.LENGTH_SHORT).show();
+                            lastWarningDate = currentDateStr;
+                        }
+                    } else {
+                        tvKcalLeft.setText(String.valueOf(data.kcalLeft));
+                        tvKcalLeft.setTextColor(Color.BLACK); // Hoặc màu mặc định của app
+                        
+                        // Reset cảnh báo nếu lượng calo giảm xuống dưới mức mục tiêu (nếu có thể)
+                        if (currentDateStr.equals(lastWarningDate)) {
+                            lastWarningDate = "";
+                        }
+                    }
+                }
+
                 if(progressKcal != null) {
                     progressKcal.setMax(data.targetCalories);
                     progressKcal.setProgress(data.totalCaloriesIn);
@@ -192,7 +214,7 @@ public class HomeFragment extends Fragment {
         EditText edtAmount = dialogView.findViewById(R.id.edt_water_amount);
         Button btnDrink = dialogView.findViewById(R.id.btn_drink_dialog);
         Button btnRemove = dialogView.findViewById(R.id.btn_remove_water_dialog);
-        Button btnCancel = dialogView.findViewById(R.id.btn_cancel_dialog);
+        Button btnCancel = dialog.findViewById(R.id.btn_cancel_dialog);
         ImageView btnClose = dialogView.findViewById(R.id.btn_close_dialog);
 
         btnDrink.setOnClickListener(v -> {

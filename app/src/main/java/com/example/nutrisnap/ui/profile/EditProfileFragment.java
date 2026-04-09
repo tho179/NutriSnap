@@ -15,11 +15,15 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+
+import com.bumptech.glide.Glide;
 import com.example.nutrisnap.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +35,7 @@ public class EditProfileFragment extends Fragment {
     private Uri currentAvatarUri;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private FirebaseStorage storage;
     private String userId;
 
     @Override
@@ -38,6 +43,7 @@ public class EditProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             userId = currentUser.getUid();
@@ -48,9 +54,7 @@ public class EditProfileFragment extends Fragment {
             Uri resultUri = bundle.getParcelable("selected_avatar_uri");
             if (resultUri != null) {
                 currentAvatarUri = resultUri;
-                if (imgAvatar != null) {
-                    imgAvatar.setImageURI(currentAvatarUri);
-                }
+                uploadAvatarToFirebase(currentAvatarUri);
             }
         });
     }
@@ -71,10 +75,6 @@ public class EditProfileFragment extends Fragment {
         edtHeight = view.findViewById(R.id.edt_edit_height);
         
         AppCompatButton btnUpdate = view.findViewById(R.id.btn_save_profile);
-
-        if (currentAvatarUri != null) {
-            imgAvatar.setImageURI(currentAvatarUri);
-        }
 
         btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
@@ -100,10 +100,18 @@ public class EditProfileFragment extends Fragment {
                 edtName.setText(documentSnapshot.getString("username"));
                 edtEmail.setText(documentSnapshot.getString("email"));
                 edtPhone.setText(documentSnapshot.getString("phone"));
-                edtWeight.setText(documentSnapshot.getString("weight"));
-                edtHeight.setText(documentSnapshot.getString("height"));
                 
-                // Email không nên cho phép sửa vì là định danh tài khoản
+                // Lấy weight/height linh hoạt (Double hoặc String)
+                Object wObj = documentSnapshot.get("weight");
+                Object hObj = documentSnapshot.get("height");
+                edtWeight.setText(wObj != null ? String.valueOf(wObj) : "");
+                edtHeight.setText(hObj != null ? String.valueOf(hObj) : "");
+                
+                String avatarUrl = documentSnapshot.getString("avatarUrl");
+                if (avatarUrl != null && !avatarUrl.isEmpty() && isAdded()) {
+                    Glide.with(this).load(avatarUrl).placeholder(R.drawable.img_avatar_placeholder).into(imgAvatar);
+                }
+                
                 edtEmail.setEnabled(false);
             }
         }).addOnFailureListener(e -> {
@@ -113,13 +121,36 @@ public class EditProfileFragment extends Fragment {
         });
     }
 
+    private void uploadAvatarToFirebase(Uri uri) {
+        if (userId == null || uri == null) return;
+
+        StorageReference avatarRef = storage.getReference().child("avatars/" + userId + ".jpg");
+        avatarRef.putFile(uri)
+            .addOnSuccessListener(taskSnapshot -> avatarRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                String downloadUrl = downloadUri.toString();
+                db.collection("users").document(userId)
+                    .update("avatarUrl", downloadUrl)
+                    .addOnSuccessListener(aVoid -> {
+                        if (isAdded()) {
+                            Glide.with(this).load(downloadUrl).into(imgAvatar);
+                            Toast.makeText(getContext(), "Avatar updated!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            }))
+            .addOnFailureListener(e -> {
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+    }
+
     private void saveProfile() {
         if (userId == null) return;
 
         String name = edtName.getText().toString().trim();
         String phone = edtPhone.getText().toString().trim();
-        String weight = edtWeight.getText().toString().trim();
-        String height = edtHeight.getText().toString().trim();
+        String weightStr = edtWeight.getText().toString().trim();
+        String heightStr = edtHeight.getText().toString().trim();
 
         if (name.isEmpty()) {
             edtName.setError(getString(R.string.name_empty_error));
@@ -129,8 +160,14 @@ public class EditProfileFragment extends Fragment {
         Map<String, Object> updates = new HashMap<>();
         updates.put("username", name);
         updates.put("phone", phone);
-        updates.put("weight", weight);
-        updates.put("height", height);
+        
+        try {
+            if (!weightStr.isEmpty()) updates.put("weight", Double.parseDouble(weightStr));
+            if (!heightStr.isEmpty()) updates.put("height", Double.parseDouble(heightStr));
+        } catch (NumberFormatException e) {
+            updates.put("weight", weightStr);
+            updates.put("height", heightStr);
+        }
 
         db.collection("users").document(userId)
             .update(updates)

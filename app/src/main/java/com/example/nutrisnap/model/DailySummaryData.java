@@ -17,6 +17,9 @@ public class DailySummaryData {
     public int waterDrank;
     public int waterTarget;
 
+    // Weight tracking
+    public float weight;
+
     // Meal specific kcal
     public int breakfastKcal;
     public int lunchKcal;

@@ -79,15 +79,44 @@ public class GoalFragment extends Fragment implements SetupProfileActivity.Setup
         String uid = mAuth.getUid();
         if (uid == null) return;
 
-        // Lấy targetWeight đã lưu từ bước trước
         db.collection("users").document(uid).get()
             .addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
-                    Double targetWeight = documentSnapshot.getDouble("targetWeight");
-                    if (targetWeight == null) targetWeight = 60.0; // Fallback
+                    // Lấy các chỉ số cần thiết, sử dụng fallback nếu thiếu
+                    Double currentWeight = documentSnapshot.getDouble("weight");
+                    if (currentWeight == null) {
+                        String wStr = documentSnapshot.getString("weight");
+                        currentWeight = (wStr != null) ? Double.parseDouble(wStr) : 60.0;
+                    }
 
-                    // Áp dụng công thức
-                    double targetCalories = 22 * targetWeight;
+                    Double currentHeight = documentSnapshot.getDouble("height");
+                    if (currentHeight == null) {
+                        String hStr = documentSnapshot.getString("height");
+                        currentHeight = (hStr != null) ? Double.parseDouble(hStr) : 165.0;
+                    }
+
+                    Long ageLong = documentSnapshot.getLong("age");
+                    int age = (ageLong != null) ? ageLong.intValue() : 25;
+
+                    Double targetWeight = documentSnapshot.getDouble("targetWeight");
+                    if (targetWeight == null) targetWeight = currentWeight;
+
+                    // 1. Tính BMR (Mifflin-St Jeor Equation cho nữ làm mặc định hoặc công thức bạn cung cấp)
+                    // BMR = 10 * Weight + 6.25 * Height - 5 * Age - 161
+                    double bmr = (10 * currentWeight) + (6.25 * currentHeight) - (5 * age) - 161;
+
+                    // 2. Tính TDEE (với mức độ hoạt động nhẹ 1.375)
+                    double tdee = bmr * 1.375;
+
+                    // 3. Tính targetCalories = 80% TDEE
+                    double targetCalories = tdee * 0.8;
+
+                    // 4. Kiểm tra ngưỡng tối thiểu 1200 kcal
+                    if (targetCalories < 1200) {
+                        targetCalories = 1200;
+                    }
+
+                    // 5. Tính Protein, Carbs, Fat dựa trên targetWeight và targetCalories mới
                     double targetProtein = 1.8 * targetWeight;
                     double targetCarbs = (0.45 * targetCalories) / 4; // 1g carb = 4 kcal
                     double targetFat = (0.25 * targetCalories) / 9;   // 1g fat = 9 kcal

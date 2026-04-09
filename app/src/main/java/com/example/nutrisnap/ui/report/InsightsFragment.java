@@ -16,6 +16,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
+import com.bumptech.glide.Glide;
 import com.example.nutrisnap.R;
 import com.example.nutrisnap.controller.DailyController;
 import com.example.nutrisnap.model.DailySummaryData;
@@ -39,6 +42,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,10 +65,14 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
     
     private Calendar currentCalendar = Calendar.getInstance();
     private String currentMode = "weekly";
-    private float userWeight = 52.56f;
+    private float userWeight = 60.0f; // Mặc định nếu không có dữ liệu
 
     private DailyController dailyController;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+
+    private List<BarEntry> currentBarEntries = new ArrayList<>();
+    private float currentTargetKcal = 2500f;
 
     @Nullable
     @Override
@@ -73,6 +81,7 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
 
         dailyController = new DailyController();
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         barChart = view.findViewById(R.id.bar_chart_calories);
         pieChart = view.findViewById(R.id.pie_chart_nutrients);
@@ -92,10 +101,33 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         btnUpdateWeight.setOnClickListener(v -> {
             showUpdateWeightDialog();
         });
-        
-        updateViewMode("weekly");
+
+        // Load cân nặng hiện tại từ User Profile trước khi hiển thị chart
+        loadCurrentUserWeight();
 
         return view;
+    }
+
+    private void loadCurrentUserWeight() {
+        String uid = mAuth.getUid();
+        if (uid != null) {
+            db.collection("users").document(uid).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists() && doc.contains("weight")) {
+                        Double w = doc.getDouble("weight");
+                        if (w == null) {
+                            String wStr = doc.getString("weight");
+                            userWeight = (wStr != null) ? Float.parseFloat(wStr) : 60.0f;
+                        } else {
+                            userWeight = w.floatValue();
+                        }
+                    }
+                    updateViewMode("weekly");
+                })
+                .addOnFailureListener(e -> updateViewMode("weekly"));
+        } else {
+            updateViewMode("weekly");
+        }
     }
 
     private void showUpdateWeightDialog() {
@@ -113,7 +145,8 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         Button btnUpdateConfirm = dialog.findViewById(R.id.btn_update_confirm);
 
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMM dd", Locale.US);
-        tvDate.setText("Today, " + sdf.format(Calendar.getInstance().getTime()));
+        Calendar now = Calendar.getInstance();
+        tvDate.setText("Today, " + sdf.format(now.getTime()));
         edtWeight.setText(String.valueOf(userWeight));
 
         btnClose.setOnClickListener(v -> dialog.dismiss());
@@ -122,10 +155,26 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
             String weightStr = edtWeight.getText().toString();
             if (!weightStr.isEmpty()) {
                 try {
-                    userWeight = Float.parseFloat(weightStr);
-                    Toast.makeText(getContext(), "Weight updated: " + weightStr + " kg", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                    updateRangeTextAndCharts();
+                    float newWeight = Float.parseFloat(weightStr);
+                    String userId = mAuth.getUid();
+                    String date = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(now.getTime());
+                    
+                    if (userId != null) {
+                        dailyController.updateWeight(userId, date, newWeight, new DailyController.UpdateCallback() {
+                            @Override
+                            public void onSuccess() {
+                                userWeight = newWeight;
+                                Toast.makeText(getContext(), "Weight updated successfully", Toast.LENGTH_SHORT).show();
+                                dialog.dismiss();
+                                updateRangeTextAndCharts();
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
                 } catch (NumberFormatException e) {
                     Toast.makeText(getContext(), "Invalid weight", Toast.LENGTH_SHORT).show();
                 }
@@ -177,7 +226,6 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         String userId = mAuth.getUid();
         if (userId == null) return;
 
-        Calendar realToday = Calendar.getInstance();
         SimpleDateFormat dbSdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         List<String> dateKeys = new ArrayList<>();
         String[] labels = new String[7];
@@ -208,8 +256,6 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
             
             Calendar labelCal = (Calendar) start.clone();
             for (int i = 0; i < 7; i++) {
-                // For simplicity, using 1st of each month as a key if we were to fetch monthly totals
-                // But daily_logs are daily. This logic might need refinement for true monthly aggregates.
                 dateKeys.add(dbSdf.format(labelCal.getTime()));
                 labels[i] = sdfRange.format(labelCal.getTime());
                 labelCal.add(Calendar.MONTH, 1);
@@ -222,7 +268,6 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
             for (int i = 0; i < 7; i++) {
                 int year = startYear + i;
                 labels[i] = String.valueOf(year);
-                // Placeholder key
                 dateKeys.add(year + "-01-01");
             }
         }
@@ -232,27 +277,43 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
             public void onSuccess(Map<String, DailySummaryData> dataMap) {
                 if (!isAdded()) return;
                 
-                List<BarEntry> barEntries = new ArrayList<>();
+                currentBarEntries.clear();
+                List<Entry> weightEntries = new ArrayList<>();
+                
                 float totalProtein = 0, totalCarbs = 0, totalFat = 0;
-                int countWithData = 0;
+                float lastKnownWeight = userWeight;
+                currentTargetKcal = 2500f; // Mặc định
 
                 for (int i = 0; i < dateKeys.size(); i++) {
                     DailySummaryData d = dataMap.get(dateKeys.get(i));
-                    float cal = (d != null) ? d.totalCaloriesIn : 0;
-                    barEntries.add(new BarEntry(i, cal));
                     
-                    if (d != null && d.totalCaloriesIn > 0) {
-                        totalProtein += d.proteinEaten;
-                        totalCarbs += d.carbsEaten;
-                        totalFat += d.fatEaten;
-                        countWithData++;
+                    if (d != null) {
+                        currentTargetKcal = d.targetCalories; // Lấy target từ dữ liệu Firestore
+                        
+                        // Calorie data
+                        float cal = d.totalCaloriesIn;
+                        currentBarEntries.add(new BarEntry(i, cal));
+                        
+                        // Nutrient data
+                        if (d.totalCaloriesIn > 0) {
+                            totalProtein += d.proteinEaten;
+                            totalCarbs += d.carbsEaten;
+                            totalFat += d.fatEaten;
+                        }
+
+                        // Weight data
+                        if (d.weight > 0) {
+                            lastKnownWeight = d.weight;
+                        }
+                    } else {
+                        currentBarEntries.add(new BarEntry(i, 0));
                     }
+                    weightEntries.add(new Entry(i, lastKnownWeight));
                 }
                 
-                updateBarChart(barEntries, labels);
+                updateBarChart(currentBarEntries, labels, currentTargetKcal);
                 updatePieChart(totalProtein, totalCarbs, totalFat);
-                // Weight chart remains simulated or could be linked to User weight history if available
-                setupLineChart(7, labels, -1);
+                updateWeightChart(weightEntries, labels);
             }
 
             @Override
@@ -264,7 +325,7 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         });
     }
 
-    private void configureBarChart(String[] labels) {
+    private void configureBarChart(String[] labels, float targetKcal) {
         barChart.getDescription().setEnabled(false);
         barChart.getLegend().setEnabled(false);
         barChart.getAxisRight().setEnabled(false);
@@ -281,23 +342,30 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         xAxis.setTextColor(Color.parseColor("#9E9E9E"));
         YAxis leftAxis = barChart.getAxisLeft();
         leftAxis.setAxisMinimum(0f);
-        leftAxis.setAxisMaximum(4500f);
+        
+        // Điều chỉnh max tự động nhưng đảm bảo chứa được vạch target
+        float maxVal = 0;
+        if (barChart.getData() != null) {
+            maxVal = barChart.getData().getYMax();
+        }
+        leftAxis.setAxisMaximum(Math.max(targetKcal + 500f, maxVal + 500f));
+        
         leftAxis.setDrawGridLines(true);
         leftAxis.setGridColor(Color.parseColor("#F2F2F2"));
         leftAxis.setDrawAxisLine(false);
         
         leftAxis.removeAllLimitLines();
-        LimitLine limitLine = new LimitLine(2500f, "");
+        LimitLine limitLine = new LimitLine(targetKcal, "");
         limitLine.setLineColor(Color.parseColor("#66BB6A"));
         limitLine.setLineWidth(1.5f);
         limitLine.enableDashedLine(10f, 10f, 0f);
         leftAxis.addLimitLine(limitLine);
     }
 
-    private void updateBarChart(List<BarEntry> entries, String[] labels) {
+    private void updateBarChart(List<BarEntry> entries, String[] labels, float targetKcal) {
         BarDataSet dataSet = new BarDataSet(entries, "Calories");
-        selectedBarIndex = entries.size() - 1; // Default to last day
-        updateBarColors(dataSet, entries.size());
+        selectedBarIndex = entries.size() - 1; 
+        updateBarColors(dataSet, entries, targetKcal);
         dataSet.setDrawValues(true);
         dataSet.setValueFormatter(new ValueFormatter() {
             @Override
@@ -307,7 +375,7 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         });
         barChart.setData(new BarData(dataSet));
         barChart.getData().setBarWidth(0.65f);
-        configureBarChart(labels);
+        configureBarChart(labels, targetKcal);
         barChart.animateY(800);
         barChart.invalidate();
     }
@@ -354,21 +422,15 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         xAxis.setAxisMaximum(labels.length - 0.5f);
 
         YAxis leftAxis = lineChart.getAxisLeft();
-        leftAxis.setAxisMinimum(0f);
-        leftAxis.setAxisMaximum(100f);
         leftAxis.setDrawGridLines(true);
         leftAxis.setGridColor(Color.parseColor("#F2F2F2"));
         leftAxis.setDrawAxisLine(false);
+        leftAxis.setAxisMinimum(0f); 
+
         lineChart.setExtraOffsets(10, 10, 10, 10);
     }
 
-    private void setupLineChart(int count, String[] labels, int todayIdx) {
-        List<Entry> entries = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            float val = userWeight + (float)(Math.random() * 1.0 - 0.5);
-            entries.add(new Entry(i, val));
-        }
-
+    private void updateWeightChart(List<Entry> entries, String[] labels) {
         LineDataSet dataSet = new LineDataSet(entries, "Weight");
         int purple = Color.parseColor("#9575CD");
         dataSet.setColor(purple);
@@ -387,15 +449,33 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         
         lineChart.setData(new LineData(dataSet));
         configureLineChart(labels);
+        
+        float min = userWeight, max = userWeight;
+        for (Entry e : entries) {
+            if (e.getY() < min) min = e.getY();
+            if (e.getY() > max) max = e.getY();
+        }
+        lineChart.getAxisLeft().setAxisMinimum(Math.max(0, min - 5f));
+        lineChart.getAxisLeft().setAxisMaximum(max + 5f);
+        
         lineChart.animateX(800);
+        lineChart.invalidate();
     }
 
-    private void updateBarColors(BarDataSet dataSet, int count) {
-        int selectedColor = Color.parseColor("#66BB6A");
-        int defaultColor = Color.parseColor("#C8E6C9");
+    private void updateBarColors(BarDataSet dataSet, List<BarEntry> entries, float targetKcal) {
+        int selectedColor = Color.parseColor("#66BB6A"); // Xanh lá
+        int defaultColor = Color.parseColor("#C8E6C9");  // Xanh lá nhạt
+        int exceededColor = Color.parseColor("#FF5252"); // Đỏ
+        int exceededSelectedColor = Color.parseColor("#D32F2F"); // Đỏ đậm
+        
         List<Integer> colors = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            colors.add(i == selectedBarIndex ? selectedColor : defaultColor);
+        for (int i = 0; i < entries.size(); i++) {
+            boolean isExceeded = entries.get(i).getY() > targetKcal;
+            if (i == selectedBarIndex) {
+                colors.add(isExceeded ? exceededSelectedColor : selectedColor);
+            } else {
+                colors.add(isExceeded ? exceededColor : defaultColor);
+            }
         }
         dataSet.setColors(colors);
     }
@@ -406,7 +486,7 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         if (barChart.getData() != null && barChart.getData().getDataSetCount() > 0) {
             BarDataSet dataSet = (BarDataSet) barChart.getData().getDataSetByIndex(0);
             if (dataSet != null) {
-                updateBarColors(dataSet, dataSet.getEntryCount());
+                updateBarColors(dataSet, currentBarEntries, currentTargetKcal);
                 barChart.invalidate();
             }
         }

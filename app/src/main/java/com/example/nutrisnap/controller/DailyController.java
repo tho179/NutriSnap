@@ -84,6 +84,10 @@ public class DailyController {
                             summary.lunchKcal = dailyDoc.contains("lunchKcal") ? dailyDoc.getDouble("lunchKcal").intValue() : 0;
                             summary.dinnerKcal = dailyDoc.contains("dinnerKcal") ? dailyDoc.getDouble("dinnerKcal").intValue() : 0;
                             summary.snackKcal = dailyDoc.contains("snackKcal") ? dailyDoc.getDouble("snackKcal").intValue() : 0;
+
+                            if (dailyDoc.contains("weight")) {
+                                summary.weight = dailyDoc.getDouble("weight").floatValue();
+                            }
                         } else {
                             summary.totalCaloriesIn = 0;
                             summary.carbsEaten = 0;
@@ -123,7 +127,7 @@ public class DailyController {
 
                     Tasks.whenAllComplete(tasks).addOnCompleteListener(t -> {
                         for (int i = 0; i < dates.size(); i++) {
-                            DocumentSnapshot doc = tasks.get(i).getResult();
+                            DocumentSnapshot doc = (DocumentSnapshot) tasks.get(i).getResult();
                             DailySummaryData data = new DailySummaryData();
                             data.targetCalories = targetCal;
                             data.carbsTarget = targetCarbs;
@@ -135,6 +139,9 @@ public class DailyController {
                                 data.carbsEaten = doc.contains("totalCarbs") ? doc.getDouble("totalCarbs").intValue() : 0;
                                 data.proteinEaten = doc.contains("totalProtein") ? doc.getDouble("totalProtein").intValue() : 0;
                                 data.fatEaten = doc.contains("totalFat") ? doc.getDouble("totalFat").intValue() : 0;
+                                if (doc.contains("weight")) {
+                                    data.weight = doc.getDouble("weight").floatValue();
+                                }
                             } else {
                                 data.totalCaloriesIn = 0;
                             }
@@ -154,6 +161,23 @@ public class DailyController {
                 .collection("daily_logs").document(date)
                 .set(updates, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
+
+    public void updateWeight(String userId, String date, float weight, UpdateCallback callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("weight", weight);
+
+        db.collection("users").document(userId)
+                .collection("daily_logs").document(date)
+                .set(updates, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    // Cập nhật cả ở User document để đồng bộ cân nặng hiện tại
+                    db.collection("users").document(userId)
+                            .update("weight", weight)
+                            .addOnSuccessListener(v -> callback.onSuccess())
+                            .addOnFailureListener(e -> callback.onFailure(e));
+                })
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
 }
