@@ -38,7 +38,7 @@ android {
     packaging {
         jniLibs {
             // Set to true to maintain the behavior of extracting native libs
-            useLegacyPackaging = true
+            useLegacyPackaging = false
         }
     }
 }

@@ -17,17 +17,20 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav_view"
         android:layout_width="match_parent"
-        android:layout_height="75dp"
+        android:layout_height="80dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="0dp"
         android:background="@color/white"
-        app:elevation="16dp"
-        app:itemIconSize="28dp"
+        app:elevation="8dp"
+        app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_color_state"
+        app:itemPaddingTop="12dp"
+        app:itemPaddingBottom="8dp"
         app:itemTextAppearanceActive="@style/BottomNavText"
         app:itemTextAppearanceInactive="@style/BottomNavText"
         app:itemTextColor="@color/nav_item_color_state"
         app:labelVisibilityMode="labeled"
+        app:itemActiveIndicatorStyle="@null"
+        app:itemRippleColor="@android:color/transparent"
         app:menu="@menu/bottom_nav_menu" />
 
     <!-- In-App Notification Overlay -->

@@ -48,6 +48,7 @@
         <activity android:name=".auth.RegisterActivity" android:exported="false" />
         <activity android:name=".auth.ForgotPasswordActivity" android:exported="false" />
         <activity android:name=".auth.VerifyOtpActivity" android:exported="false" />
+        <activity android:name=".auth.ResetPasswordActivity" android:exported="false" />
         <activity android:name=".auth.ChangePasswordActivity" android:exported="false" />
         <activity android:name=".auth.NotificationSuccessActivity" android:exported="false" />
         <activity android:name=".auth.WelcomeActivity" android:exported="false" />

@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:text="You’re All Set !"
+        android:text="@string/all_set"
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold" />
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:gravity="center"
-        android:text="You've successfully changed your password."
+        android:text="@string/password_changed_success"
         android:textColor="#757575"
         android:textSize="14sp" />
 
@@ -47,7 +47,7 @@
         android:layout_height="55dp"
         android:layout_marginBottom="60dp"
         android:background="@drawable/bg_button_green"
-        android:text="Sign in"
+        android:text="@string/signin_button"
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="18sp"

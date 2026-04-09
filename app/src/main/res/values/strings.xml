@@ -5,6 +5,59 @@
     <string name="insights">Insights</string>
     <string name="profile">Profile</string>
 
+    <!-- Auth -->
+    <string name="login_welcome">Welcome back!</string>
+    <string name="login_subtitle">Log in to existing NutriSnap account</string>
+    <string name="username_hint">Username</string>
+    <string name="password_hint">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login_button">LOG IN</string>
+    <string name="dont_have_account">Don\'t have an account? </string>
+    <string name="signup_link">Sign Up</string>
+    <string name="register_title">Let’s Get Started!</string>
+    <string name="email_hint">Email</string>
+    <string name="confirm_password_hint">Confirm password</string>
+    <string name="create_button">Create</string>
+    <string name="return_link">Return</string>
+    <string name="logout_confirm_title">Are you sure want to logout</string>
+    <string name="logout_confirm_msg">Thank you and see you again ❤️</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Forgot Password -->
+    <string name="forgot_password_title">Forgot password?</string>
+    <string name="forgot_password_desc">Please enter your registered email address below. We\'ll send you a One-Time Password(OTP) to reset your password securely.</string>
+    <string name="registered_email_label">Registered Email Address</string>
+    <string name="send_reset_link">Send Reset Link</string>
+
+    <!-- Setup Profile -->
+    <string name="continue_button">Continue</string>
+    <string name="gender_title">What’s your gender?</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="name_title">What’s your name?</string>
+    <string name="name_hint">Your name</string>
+    <string name="age_title">How old are you?</string>
+    <string name="height_title">How tall are you?</string>
+    <string name="weight_title">What’s your current\nweight?</string>
+    <string name="target_weight_title">What’s your target\nweight?</string>
+    <string name="goal_title">Choose your goal</string>
+
+    <!-- Success Screen -->
+    <string name="all_set">You’re All Set !</string>
+    <string name="password_changed_success">You\'ve successfully changed your password.</string>
+    <string name="signin_button">Sign in</string>
+
+    <!-- Welcome -->
+    <string name="welcome_slogan">Let’s join with us</string>
+    <string name="start_button">Start</string>
+
+    <!-- Dialogs -->
+    <string name="drink_water_title">Drink Water</string>
+    <string name="drink_button">Drink</string>
+    <string name="decrease_button">Decrease</string>
+    <string name="delete_confirm_question">Do you really want to\ndelete this?</string>
+    <string name="yes_button">Yes</string>
+
     <!-- Home -->
     <string name="kcal_left_unit">%s</string>
     <string name="kcal_missing">kcal left</string>

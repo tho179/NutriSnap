@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="80dp"
-        android:text="How old are you?"
+        android:text="@string/age_title"
         android:textColor="@color/black"
         android:textSize="26sp"
         android:textStyle="bold" />

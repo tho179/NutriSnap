@@ -43,7 +43,7 @@
         android:layout_height="55dp"
         android:layout_margin="24dp"
         android:background="@drawable/bg_button_green"
-        android:text="Continue"
+        android:text="@string/continue_button"
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="18sp"

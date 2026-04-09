@@ -2,7 +2,6 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.NutriSnap" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
     <style name="Theme.NutriSnap" parent="Base.Theme.NutriSnap" />
@@ -57,10 +56,10 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <!-- Bottom Navigation Text Style -->
+    <!-- Tinh chỉnh Bottom Navigation Text -->
     <style name="BottomNavText">
-        <item name="android:textSize">12sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
 </resources>

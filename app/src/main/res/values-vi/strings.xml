@@ -5,6 +5,59 @@
     <string name="insights">Phân tích</string>
     <string name="profile">Cá nhân</string>
 
+    <!-- Auth -->
+    <string name="login_welcome">Chào mừng trở lại!</string>
+    <string name="login_subtitle">Đăng nhập vào tài khoản NutriSnap của bạn</string>
+    <string name="username_hint">Tên đăng nhập</string>
+    <string name="password_hint">Mật khẩu</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="login_button">ĐĂNG NHẬP</string>
+    <string name="dont_have_account">Chưa có tài khoản? </string>
+    <string name="signup_link">Đăng ký</string>
+    <string name="register_title">Bắt đầu thôi!</string>
+    <string name="email_hint">Email</string>
+    <string name="confirm_password_hint">Xác nhận mật khẩu</string>
+    <string name="create_button">Tạo tài khoản</string>
+    <string name="return_link">Quay lại</string>
+    <string name="logout_confirm_title">Bạn có chắc chắn muốn đăng xuất?</string>
+    <string name="logout_confirm_msg">Cảm ơn và hẹn gặp lại ❤️</string>
+    <string name="cancel">Hủy</string>
+
+    <!-- Forgot Password -->
+    <string name="forgot_password_title">Quên mật khẩu?</string>
+    <string name="forgot_password_desc">Vui lòng nhập địa chỉ email đã đăng ký của bạn bên dưới. Chúng tôi sẽ gửi mã OTP để đặt lại mật khẩu của bạn một cách bảo mật.</string>
+    <string name="registered_email_label">Địa chỉ Email đã đăng ký</string>
+    <string name="send_reset_link">Gửi liên kết đặt lại</string>
+
+    <!-- Setup Profile -->
+    <string name="continue_button">Tiếp tục</string>
+    <string name="gender_title">Giới tính của bạn là gì?</string>
+    <string name="male">Nam</string>
+    <string name="female">Nữ</string>
+    <string name="name_title">Tên của bạn là gì?</string>
+    <string name="name_hint">Tên của bạn</string>
+    <string name="age_title">Bạn bao nhiêu tuổi?</string>
+    <string name="height_title">Chiều cao của bạn?</string>
+    <string name="weight_title">Cân nặng hiện tại\ncủa bạn?</string>
+    <string name="target_weight_title">Cân nặng mục tiêu\ncủa bạn?</string>
+    <string name="goal_title">Chọn mục tiêu của bạn</string>
+
+    <!-- Success Screen -->
+    <string name="all_set">Tất cả đã sẵn sàng !</string>
+    <string name="password_changed_success">Bạn đã thay đổi mật khẩu thành công.</string>
+    <string name="signin_button">Đăng nhập</string>
+
+    <!-- Welcome -->
+    <string name="welcome_slogan">Hãy cùng tham gia với chúng tôi</string>
+    <string name="start_button">Bắt đầu</string>
+
+    <!-- Dialogs -->
+    <string name="drink_water_title">Uống nước</string>
+    <string name="drink_button">Uống</string>
+    <string name="decrease_button">Giảm</string>
+    <string name="delete_confirm_question">Bạn có chắc chắn muốn\nxóa không?</string>
+    <string name="yes_button">Có</string>
+
     <!-- Home -->
     <string name="kcal_left_unit">%s</string>
     <string name="kcal_missing">kcal còn lại</string>
@@ -42,6 +95,10 @@
     <string name="phone_number">Số điện thoại</string>
     <string name="weight_label">Cân nặng</string>
     <string name="height_label">Chiều cao</string>
+    <string name="load_data_error">Lỗi khi tải dữ liệu</string>
+    <string name="name_empty_error">Tên không được để trống</string>
+    <string name="update_success">Cập nhật thành công!</string>
+    <string name="update_data_error">Lỗi khi cập nhật dữ liệu</string>
 
     <!-- Target -->
     <string name="target_title">Mục tiêu</string>
@@ -119,4 +176,10 @@
     <string name="query_error">Lỗi truy vấn: %s</string>
     <string name="email_info_not_found">Không tìm thấy thông tin email!</string>
     <string name="update_error">Lỗi cập nhật: %s</string>
+
+    <!-- Languages -->
+    <string name="lang_en">English</string>
+    <string name="lang_vi">Tiếng Việt</string>
+    <string name="lang_ja">日本語 (Japanese)</string>
+    <string name="language_changed">Đã đổi ngôn ngữ sang %s</string>
 </resources>

@@ -14,6 +14,7 @@ import com.example.nutrisnap.R;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -33,7 +34,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        
         email = getIntent().getStringExtra("email");
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (email == null && currentUser != null) {
+            email = currentUser.getEmail();
+        }
 
         ImageView btnBack = findViewById(R.id.btn_back_change_password);
         EditText etNewPassword = findViewById(R.id.et_new_password);
@@ -41,7 +47,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
         AppCompatButton btnSave = findViewById(R.id.btn_save_password);
 
         btnBack.setOnClickListener(v -> finish());
-
         setupPasswordToggles(etNewPassword, etConfirmNewPassword);
 
         btnSave.setOnClickListener(v -> {
@@ -49,159 +54,114 @@ public class ChangePasswordActivity extends AppCompatActivity {
             String confirmPass = etConfirmNewPassword.getText().toString().trim();
 
             if (newPass.isEmpty() || confirmPass.isEmpty()) {
-                Toast.makeText(this, R.string.enter_new_password_toast, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Vui lòng nhập mật khẩu mới", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (!newPass.equals(confirmPass)) {
-                Toast.makeText(this, R.string.passwords_do_not_match, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (newPass.length() < 6) {
-                Toast.makeText(this, R.string.password_length_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Mật khẩu phải từ 6 ký tự", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            updatePasswordFlow(newPass);
+            performChangePassword(newPass);
         });
     }
 
-    private void updatePasswordFlow(String newPass) {
-        if (email == null || email.isEmpty()) {
-            Toast.makeText(this, R.string.email_info_not_found, Toast.LENGTH_SHORT).show();
+    private void performChangePassword(String newPass) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Phiên đăng nhập hết hạn", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 1. Lấy mật khẩu cũ từ Firestore để phục vụ việc xác thực lại với Firebase Auth
-        db.collection("users")
-            .whereEqualTo("email", email)
-            .get()
-            .addOnSuccessListener(queryDocumentSnapshots -> {
-                if (!queryDocumentSnapshots.isEmpty()) {
-                    QueryDocumentSnapshot document = (QueryDocumentSnapshot) queryDocumentSnapshots.getDocuments().get(0);
-                    String oldPassInFirestore = document.getString("password");
-                    String docId = document.getId();
-                    
-                    syncWithFirebaseAuth(docId, newPass, oldPassInFirestore);
+        // Thử cập nhật mật khẩu trực tiếp
+        user.updatePassword(newPass).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // Thành công -> Cập nhật Database
+                updateFirestorePassword(newPass);
+            } else {
+                if (task.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
+                    // Nếu Firebase yêu cầu xác thực lại (do đăng nhập đã lâu)
+                    handleReauthentication(newPass);
                 } else {
-                    Toast.makeText(this, R.string.account_not_found, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Lỗi: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                 }
-            })
-            .addOnFailureListener(e -> {
-                Toast.makeText(this, "Lỗi kết nối Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            });
+            }
+        });
     }
 
-    private void syncWithFirebaseAuth(String docId, String newPass, String oldPass) {
-        FirebaseUser user = mAuth.getCurrentUser();
+    private void handleReauthentication(String newPass) {
+        // Lấy mật khẩu cũ đang lưu trong Database để tự động xác thực cho user
+        db.collection("users").whereEqualTo("email", email).get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                if (!queryDocumentSnapshots.isEmpty()) {
+                    QueryDocumentSnapshot doc = (QueryDocumentSnapshot) queryDocumentSnapshots.getDocuments().get(0);
+                    String oldPass = doc.getString("password");
+                    String docId = doc.getId();
 
-        if (oldPass == null || oldPass.isEmpty()) {
-            Toast.makeText(this, "Không tìm thấy thông tin mật khẩu cũ để xác thực.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (user != null && user.getEmail() != null && user.getEmail().equalsIgnoreCase(email)) {
-            // Trường hợp 1: Đã đăng nhập -> Xác thực lại (Re-authenticate) trước khi đổi
-            AuthCredential credential = EmailAuthProvider.getCredential(email, oldPass);
-            user.reauthenticate(credential).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    user.updatePassword(newPass).addOnCompleteListener(updateTask -> {
-                        if (updateTask.isSuccessful()) {
-                            // Cập nhật Firestore CHỈ khi Firebase Auth đã đổi thành công
-                            updateFirestorePassword(docId, newPass);
-                        } else {
-                            String error = updateTask.getException() != null ? updateTask.getException().getMessage() : "Lỗi đổi mật khẩu Auth.";
-                            Toast.makeText(this, "Lỗi Firebase Auth: " + error, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    String error = task.getException() != null ? task.getException().getMessage() : "Mật khẩu cũ không khớp.";
-                    Toast.makeText(this, "Xác thực thất bại: " + error, Toast.LENGTH_LONG).show();
-                    // Log ra để debug nếu cần
-                    Log.e("ChangePassword", "Re-auth failed for email: " + email + " with pass: " + oldPass);
-                }
-            });
-        } else {
-            // Trường hợp 2: Quên mật khẩu hoặc session không khớp (thường là luồng Forgot Password)
-            // Đăng nhập tạm thời bằng mật khẩu cũ (từ Firestore) để lấy quyền updatePassword
-            mAuth.signInWithEmailAndPassword(email, oldPass)
-                .addOnSuccessListener(authResult -> {
-                    FirebaseUser newUser = authResult.getUser();
-                    if (newUser != null) {
-                        newUser.updatePassword(newPass).addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                updateFirestorePassword(docId, newPass);
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if (user != null && oldPass != null) {
+                        AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), oldPass);
+                        user.reauthenticate(credential).addOnCompleteListener(reAuthTask -> {
+                            if (reAuthTask.isSuccessful()) {
+                                // Xác thực xong, thử đổi lại lần nữa
+                                user.updatePassword(newPass).addOnCompleteListener(updateTask -> {
+                                    if (updateTask.isSuccessful()) {
+                                        updateFirestorePassword(newPass);
+                                    }
+                                });
                             } else {
-                                String error = task.getException() != null ? task.getException().getMessage() : "Lỗi đổi mật khẩu.";
-                                Toast.makeText(this, "Lỗi Firebase Auth: " + error, Toast.LENGTH_LONG).show();
+                                // Nếu mật khẩu trong Database cũng sai so với Auth
+                                Toast.makeText(this, "Để bảo mật, vui lòng Đăng xuất và Đăng nhập lại để đổi mật khẩu.", Toast.LENGTH_LONG).show();
                             }
                         });
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Xác thực mật khẩu cũ thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    Log.e("AuthSync", "Login failed: " + e.getMessage());
-                });
-        }
-    }
-
-    private void updateFirestorePassword(String docId, String newPass) {
-        db.collection("users").document(docId)
-            .update("password", newPass)
-            .addOnSuccessListener(aVoid -> proceedToSuccess())
-            .addOnFailureListener(e -> {
-                Toast.makeText(this, "Lỗi cập nhật Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             });
     }
 
-    private void proceedToSuccess() {
-        Toast.makeText(this, R.string.password_updated_success, Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(ChangePasswordActivity.this, NotificationSuccessActivity.class);
-        startActivity(intent);
-        finish();
+    private void updateFirestorePassword(String newPass) {
+        db.collection("users").whereEqualTo("email", email).get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                if (!queryDocumentSnapshots.isEmpty()) {
+                    String docId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                    db.collection("users").document(docId).update("password", newPass)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(this, "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                }
+            });
     }
 
     private void setupPasswordToggles(EditText etNewPassword, EditText etConfirmNewPassword) {
         etNewPassword.setOnTouchListener((v, event) -> {
-            final int DRAWABLE_RIGHT = 2;
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                if (etNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT] != null) {
-                    if (event.getRawX() >= (etNewPassword.getRight() - etNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width() - 50)) {
-                        isNewPasswordVisible = !isNewPasswordVisible;
-                        togglePasswordVisibility(etNewPassword, isNewPasswordVisible);
-                        v.performClick();
-                        return true;
-                    }
-                }
+            if (event.getAction() == MotionEvent.ACTION_UP && event.getRawX() >= (etNewPassword.getRight() - 100)) {
+                isNewPasswordVisible = !isNewPasswordVisible;
+                toggleVisibility(etNewPassword, isNewPasswordVisible);
+                return true;
             }
             return false;
         });
 
         etConfirmNewPassword.setOnTouchListener((v, event) -> {
-            final int DRAWABLE_RIGHT = 2;
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                if (etConfirmNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT] != null) {
-                    if (event.getRawX() >= (etConfirmNewPassword.getRight() - etConfirmNewPassword.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width() - 50)) {
-                        isConfirmPasswordVisible = !isConfirmPasswordVisible;
-                        togglePasswordVisibility(etConfirmNewPassword, isConfirmPasswordVisible);
-                        v.performClick();
-                        return true;
-                    }
-                }
+            if (event.getAction() == MotionEvent.ACTION_UP && event.getRawX() >= (etConfirmNewPassword.getRight() - 100)) {
+                isConfirmPasswordVisible = !isConfirmPasswordVisible;
+                toggleVisibility(etConfirmNewPassword, isConfirmPasswordVisible);
+                return true;
             }
             return false;
         });
     }
 
-    private void togglePasswordVisibility(EditText editText, boolean isVisible) {
-        if (isVisible) {
-            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            editText.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye_visible, 0);
-        } else {
-            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            editText.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye_hidden, 0);
-        }
+    private void toggleVisibility(EditText editText, boolean isVisible) {
+        editText.setInputType(isVisible ? InputType.TYPE_CLASS_TEXT : (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD));
+        editText.setCompoundDrawablesWithIntrinsicBounds(0, 0, isVisible ? R.drawable.ic_eye_visible : R.drawable.ic_eye_hidden, 0);
         editText.setSelection(editText.getText().length());
     }
 }
