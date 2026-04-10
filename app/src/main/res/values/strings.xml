@@ -99,6 +99,9 @@
     <string name="name_empty_error">Name cannot be empty</string>
     <string name="update_success">Update successful!</string>
     <string name="update_data_error">Error updating data</string>
+    <string name="preview_profile_picture">Preview profile picture</string>
+    <string name="select_photo">Select Photo</string>
+    <string name="adjust_photo">Adjust Photo</string>
 
     <!-- Target -->
     <string name="target_title">Target</string>

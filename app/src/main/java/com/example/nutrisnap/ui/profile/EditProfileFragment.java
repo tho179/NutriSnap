@@ -17,13 +17,17 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.ObjectKey;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.UploadRequest;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
 import com.example.nutrisnap.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,29 +36,32 @@ public class EditProfileFragment extends Fragment {
 
     private EditText edtName, edtEmail, edtPhone, edtWeight, edtHeight;
     private ImageView imgAvatar;
-    private Uri currentAvatarUri;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private FirebaseStorage storage;
     private String userId;
+    private ListenerRegistration profileListener;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        storage = FirebaseStorage.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             userId = currentUser.getUid();
         }
 
-        // Lắng nghe kết quả từ PhotoAdjustmentFragment
+        // Lắng nghe kết quả từ PhotoAdjustmentFragment (Uri ảnh)
         getParentFragmentManager().setFragmentResultListener("avatar_request", this, (requestKey, bundle) -> {
             Uri resultUri = bundle.getParcelable("selected_avatar_uri");
-            if (resultUri != null) {
-                currentAvatarUri = resultUri;
-                uploadAvatarToFirebase(currentAvatarUri);
+            if (resultUri == null) {
+                // Thử lấy mảng byte nếu Uri bị null do quyền truy cập
+                byte[] bytes = bundle.getByteArray("selected_avatar_bytes");
+                if (bytes != null) {
+                    uploadAvatarToCloudinary(bytes);
+                }
+            } else {
+                uploadAvatarToCloudinary(resultUri);
             }
         });
     }
@@ -64,9 +71,9 @@ public class EditProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
-        ImageView btnBack = view.findViewById(R.id.btn_back_edit_profile);
         imgAvatar = view.findViewById(R.id.img_edit_avatar);
         CardView btnChangeAvatar = view.findViewById(R.id.btn_change_avatar);
+        ImageView btnBack = view.findViewById(R.id.btn_back_edit_profile);
         
         edtName = view.findViewById(R.id.edt_edit_name);
         edtEmail = view.findViewById(R.id.edt_edit_email);
@@ -77,71 +84,97 @@ public class EditProfileFragment extends Fragment {
         AppCompatButton btnUpdate = view.findViewById(R.id.btn_save_profile);
 
         btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+        btnChangeAvatar.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.nav_photo_selection));
+        btnUpdate.setOnClickListener(v -> saveProfile());
 
-        btnChangeAvatar.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.nav_photo_selection);
-        });
-
-        btnUpdate.setOnClickListener(v -> {
-            saveProfile();
-        });
-
-        loadCurrentProfile();
+        startProfileListener();
 
         return view;
     }
 
-    private void loadCurrentProfile() {
+    private void startProfileListener() {
         if (userId == null) return;
 
-        DocumentReference docRef = db.collection("users").document(userId);
-        docRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                edtName.setText(documentSnapshot.getString("username"));
-                edtEmail.setText(documentSnapshot.getString("email"));
-                edtPhone.setText(documentSnapshot.getString("phone"));
+        profileListener = db.collection("users").document(userId)
+            .addSnapshotListener((documentSnapshot, e) -> {
+                if (e != null || documentSnapshot == null || !documentSnapshot.exists() || !isAdded()) return;
+
+                if (!edtName.hasFocus()) edtName.setText(documentSnapshot.getString("username"));
+                if (!edtEmail.hasFocus()) edtEmail.setText(documentSnapshot.getString("email"));
+                if (!edtPhone.hasFocus()) edtPhone.setText(documentSnapshot.getString("phone"));
                 
-                // Lấy weight/height linh hoạt (Double hoặc String)
                 Object wObj = documentSnapshot.get("weight");
                 Object hObj = documentSnapshot.get("height");
-                edtWeight.setText(wObj != null ? String.valueOf(wObj) : "");
-                edtHeight.setText(hObj != null ? String.valueOf(hObj) : "");
+                if (!edtWeight.hasFocus()) edtWeight.setText(wObj != null ? String.valueOf(wObj) : "");
+                if (!edtHeight.hasFocus()) edtHeight.setText(hObj != null ? String.valueOf(hObj) : "");
                 
                 String avatarUrl = documentSnapshot.getString("avatarUrl");
-                if (avatarUrl != null && !avatarUrl.isEmpty() && isAdded()) {
-                    Glide.with(this).load(avatarUrl).placeholder(R.drawable.img_avatar_placeholder).into(imgAvatar);
+                if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                    Glide.with(this)
+                        .load(avatarUrl)
+                        .signature(new ObjectKey(avatarUrl)) 
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .placeholder(R.drawable.img_avatar_placeholder)
+                        .into(imgAvatar);
                 }
-                
                 edtEmail.setEnabled(false);
-            }
-        }).addOnFailureListener(e -> {
-            if (isAdded()) {
-                Toast.makeText(getContext(), R.string.load_data_error, Toast.LENGTH_SHORT).show();
-            }
-        });
+            });
     }
 
-    private void uploadAvatarToFirebase(Uri uri) {
-        if (userId == null || uri == null) return;
+    private void uploadAvatarToCloudinary(Object source) {
+        if (userId == null || source == null) return;
 
-        StorageReference avatarRef = storage.getReference().child("avatars/" + userId + ".jpg");
-        avatarRef.putFile(uri)
-            .addOnSuccessListener(taskSnapshot -> avatarRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                String downloadUrl = downloadUri.toString();
-                db.collection("users").document(userId)
-                    .update("avatarUrl", downloadUrl)
-                    .addOnSuccessListener(aVoid -> {
+        UploadRequest request;
+        if (source instanceof Uri) {
+            request = MediaManager.get().upload((Uri) source);
+        } else if (source instanceof byte[]) {
+            request = MediaManager.get().upload((byte[]) source);
+        } else if (source instanceof String) {
+            request = MediaManager.get().upload((String) source);
+        } else if (source instanceof Integer) {
+            request = MediaManager.get().upload((Integer) source);
+        } else {
+            return;
+        }
+
+        Toast.makeText(getContext(), "Đang tải ảnh lên Cloudinary...", Toast.LENGTH_SHORT).show();
+
+        request.unsigned("avatar_upload_preset")
+                .option("folder", "avatars")
+                .option("public_id", userId) // Ghi đè ảnh cũ của chính user đó
+                .callback(new UploadCallback() {
+                    @Override
+                    public void onStart(String requestId) { Log.d("CLOUDINARY", "Start"); }
+
+                    @Override
+                    public void onProgress(String requestId, long bytes, long totalBytes) { }
+
+                    @Override
+                    public void onSuccess(String requestId, Map resultData) {
+                        String imageUrl = resultData.get("secure_url").toString();
+                        updateAvatarUrlInFirestore(imageUrl);
+                    }
+
+                    @Override
+                    public void onError(String requestId, ErrorInfo error) {
                         if (isAdded()) {
-                            Glide.with(this).load(downloadUrl).into(imgAvatar);
-                            Toast.makeText(getContext(), "Avatar updated!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Lỗi Cloudinary: " + error.getDescription(), Toast.LENGTH_SHORT).show();
                         }
-                    });
-            }))
-            .addOnFailureListener(e -> {
-                if (isAdded()) {
-                    Toast.makeText(getContext(), "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                    }
+
+                    @Override
+                    public void onReschedule(String requestId, ErrorInfo error) { }
+                }).dispatch();
+    }
+
+    private void updateAvatarUrlInFirestore(String imageUrl) {
+        db.collection("users").document(userId)
+                .update("avatarUrl", imageUrl)
+                .addOnSuccessListener(aVoid -> {
+                    if (isAdded()) {
+                        Toast.makeText(getContext(), "Cập nhật ảnh thành công!", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void saveProfile() {
@@ -174,14 +207,19 @@ public class EditProfileFragment extends Fragment {
             .addOnSuccessListener(aVoid -> {
                 if (isAdded()) {
                     Toast.makeText(getContext(), R.string.update_success, Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(getView()).popBackStack();
+                    Navigation.findNavController(requireView()).popBackStack();
                 }
             })
             .addOnFailureListener(e -> {
-                Log.e("NutriSnap_Error", "Update failed: " + e.getMessage());
                 if (isAdded()) {
                     Toast.makeText(getContext(), R.string.update_data_error, Toast.LENGTH_SHORT).show();
                 }
             });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (profileListener != null) profileListener.remove();
     }
 }

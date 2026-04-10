@@ -20,16 +20,20 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.ObjectKey;
 import com.example.nutrisnap.R;
 import com.example.nutrisnap.auth.ChangePasswordActivity;
 import com.example.nutrisnap.auth.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 public class ProfileFragment extends Fragment {
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private ListenerRegistration userListener;
     
     private TextView tvName, tvEmail, tvWeight, tvHeight;
     private ImageView imgAvatar;
@@ -59,7 +63,7 @@ public class ProfileFragment extends Fragment {
         Button btnLogout = view.findViewById(R.id.btn_log_out);
 
         // Lấy dữ liệu từ Firebase
-        loadUserData();
+        startUserListener();
 
         cardProfileInfo.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.nav_edit_profile));
         btnLanguage.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.nav_language));
@@ -82,17 +86,25 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    private void loadUserData() {
+    private void startUserListener() {
         String userId = mAuth.getUid();
         if (userId == null) return;
 
-        db.collection("users").document(userId).get()
-            .addOnSuccessListener(documentSnapshot -> {
-                if (documentSnapshot.exists()) {
+        userListener = db.collection("users").document(userId)
+            .addSnapshotListener((documentSnapshot, e) -> {
+                if (e != null) {
+                    if (isAdded()) {
+                        Toast.makeText(getContext(), "Error loading profile", Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                }
+
+                if (documentSnapshot != null && documentSnapshot.exists()) {
                     String name = documentSnapshot.getString("username");
                     String email = documentSnapshot.getString("email");
-                    Double weight = documentSnapshot.getDouble("weight");
-                    Double height = documentSnapshot.getDouble("height");
+                    
+                    Object weight = documentSnapshot.get("weight");
+                    Object height = documentSnapshot.get("height");
                     String avatarUrl = documentSnapshot.getString("avatarUrl");
 
                     userEmail = email;
@@ -106,15 +118,24 @@ public class ProfileFragment extends Fragment {
                     tvHeight.setText(getString(R.string.height_display, heightVal));
 
                     if (avatarUrl != null && !avatarUrl.isEmpty() && isAdded()) {
-                        Glide.with(this).load(avatarUrl).placeholder(R.drawable.img_avatar_placeholder).into(imgAvatar);
+                        // Thêm Signature và DiskCacheStrategy để buộc Glide làm mới ảnh
+                        Glide.with(this)
+                            .load(avatarUrl)
+                            .signature(new ObjectKey(System.currentTimeMillis() / (60 * 1000))) // Làm mới cache mỗi phút
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .placeholder(R.drawable.img_avatar_placeholder)
+                            .into(imgAvatar);
                     }
                 }
-            })
-            .addOnFailureListener(e -> {
-                if (isAdded()) {
-                    Toast.makeText(getContext(), getString(R.string.load_data_error) + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
             });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (userListener != null) {
+            userListener.remove();
+        }
     }
 
     private void showLogoutDialog() {

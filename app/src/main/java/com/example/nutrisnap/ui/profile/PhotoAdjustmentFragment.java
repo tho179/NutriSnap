@@ -1,17 +1,24 @@
 package com.example.nutrisnap.ui.profile;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import com.bumptech.glide.Glide;
 import com.example.nutrisnap.R;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 public class PhotoAdjustmentFragment extends Fragment {
 
@@ -33,24 +40,48 @@ public class PhotoAdjustmentFragment extends Fragment {
         TextView btnSaveHeader = view.findViewById(R.id.btn_save_adjust_header);
 
         if (imageUri != null) {
-            imgPreview.setImageURI(imageUri);
+            Glide.with(this).load(imageUri).into(imgPreview);
         }
 
         btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
-
-        btnRetake.setOnClickListener(v -> {
-            Navigation.findNavController(v).popBackStack();
-        });
+        btnRetake.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
         btnSaveHeader.setOnClickListener(v -> {
-            Bundle result = new Bundle();
-            result.putParcelable("selected_avatar_uri", imageUri);
-            getParentFragmentManager().setFragmentResult("avatar_request", result);
-            
-            // Navigate back to Edit Profile (pop Adjustment and Selection)
-            Navigation.findNavController(v).popBackStack(R.id.nav_edit_profile, false);
+            processAndReturnImage();
         });
 
         return view;
+    }
+
+    private void processAndReturnImage() {
+        if (imageUri == null) return;
+        
+        try {
+            // Đọc và nén ảnh ngay tại đây để tránh lỗi quyền truy cập URI sau này
+            InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            
+            // Resize nếu ảnh quá lớn để tránh lỗi OutOfMemory hoặc upload quá lâu
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            if (width > 1024 || height > 1024) {
+                float scale = Math.min(1024f / width, 1024f / height);
+                bitmap = Bitmap.createScaledBitmap(bitmap, (int)(width * scale), (int)(height * scale), true);
+            }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+            byte[] imageData = baos.toByteArray();
+
+            Bundle result = new Bundle();
+            result.putByteArray("selected_avatar_bytes", imageData);
+            getParentFragmentManager().setFragmentResult("avatar_request", result);
+            
+            Navigation.findNavController(requireView()).popBackStack(R.id.nav_edit_profile, false);
+            
+        } catch (Exception e) {
+            Log.e("PhotoAdjust", "Error processing image", e);
+            Toast.makeText(getContext(), "Lỗi xử lý ảnh", Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -89,4 +89,7 @@ dependencies {
 
     // WorkManager cho Local Notifications (Nhắc nhở)
     implementation("androidx.work:work-runtime:2.9.0")
+
+    // Cloudinary
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
 }

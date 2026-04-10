@@ -99,6 +99,9 @@
     <string name="name_empty_error">Tên không được để trống</string>
     <string name="update_success">Cập nhật thành công!</string>
     <string name="update_data_error">Lỗi khi cập nhật dữ liệu</string>
+    <string name="preview_profile_picture">Xem trước ảnh đại diện</string>
+    <string name="select_photo">Chọn ảnh</string>
+    <string name="adjust_photo">Chỉnh sửa ảnh</string>
 
     <!-- Target -->
     <string name="target_title">Mục tiêu</string>

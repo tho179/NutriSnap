@@ -27,7 +27,7 @@ public class InputNameFragment extends Fragment implements SetupProfileActivity.
         if (etName != null) {
             String name = etName.getText().toString().trim();
             if (!name.isEmpty()) {
-                ((SetupProfileActivity) requireActivity()).updateUserField("fullName", name);
+                ((SetupProfileActivity) requireActivity()).updateUserField("username", name);
             }
         }
     }

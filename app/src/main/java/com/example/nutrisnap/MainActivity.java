@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -13,10 +14,14 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
+
+import com.cloudinary.android.MediaManager;
 import com.example.nutrisnap.databinding.ActivityMainBinding;
 import com.example.nutrisnap.utils.LocaleHelper;
 import com.example.nutrisnap.utils.NotificationHelper;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Khởi tạo Cloudinary
+        initCloudinary();
+
         requestNotificationPermission();
 
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
@@ -46,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
             
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
                 int id = destination.getId();
-                // Xóa nav_analysis vì nó không tồn tại trong mobile_navigation.xml
                 if (id == R.id.nav_breakfast || id == R.id.nav_lunch || id == R.id.nav_dinner || 
                     id == R.id.nav_snacks || id == R.id.nav_chatbot) {
                     binding.navView.setVisibility(View.GONE);
@@ -59,6 +66,17 @@ public class MainActivity extends AppCompatActivity {
         setupDefaultReminders();
     }
 
+    private void initCloudinary() {
+        try {
+            Map<String, String> config = new HashMap<>();
+            config.put("cloud_name", "dadim1ace");
+            MediaManager.init(this, config);
+            Log.d("CLOUDINARY", "Initialized successfully");
+        } catch (IllegalStateException e) {
+            Log.d("CLOUDINARY", "Already initialized");
+        }
+    }
+
     private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -68,15 +86,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDefaultReminders() {
-        // 1. Nhắc ghi chép bữa ăn (Sáng: 8h, Trưa: 12h, Tối: 19h)
         NotificationHelper.scheduleNotification(this, "Bữa sáng tới rồi!", "Đừng quên chụp ảnh bữa sáng để theo dõi calo nhé 🥗", 1001, 8, 0);
         NotificationHelper.scheduleNotification(this, "Đã đến giờ ăn trưa", "Một bữa trưa lành mạnh đang chờ bạn ghi lại đó!", 1002, 12, 0);
         NotificationHelper.scheduleNotification(this, "Ghi lại bữa tối thôi", "Kết thúc ngày bằng việc ghi chép bữa tối đầy đủ nào 🌙", 1003, 19, 0);
-
-        // 3. Nhắc cập nhật cân nặng
         NotificationHelper.scheduleNotification(this, "Kiểm tra cân nặng", "Hôm nay bạn cảm thấy thế nào? Hãy cập nhật cân nặng mới nhé ⚖️", 1004, 9, 30);
-
-        // 5. Câu nói truyền động lực (7h sáng)
         NotificationHelper.scheduleNotification(this, "Chào ngày mới!", "Một cơ thể khỏe mạnh bắt đầu từ một bữa ăn lành mạnh. Cố lên! 💪", 1005, 21, 02);
     }
 
