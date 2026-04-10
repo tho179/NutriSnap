@@ -1,5 +1,7 @@
 package com.example.nutrisnap.model;
 
+import java.util.Objects;
+
 public class FoodItem {
     private String name;
     private int amount;
@@ -37,4 +39,22 @@ public class FoodItem {
 
     public double getFat() { return fat; }
     public void setFat(double fat) { this.fat = fat; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FoodItem foodItem = (FoodItem) o;
+        return amount == foodItem.amount &&
+                Double.compare(foodItem.calories, calories) == 0 &&
+                Double.compare(foodItem.protein, protein) == 0 &&
+                Double.compare(foodItem.carbs, carbs) == 0 &&
+                Double.compare(foodItem.fat, fat) == 0 &&
+                Objects.equals(name, foodItem.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, amount, calories, protein, carbs, fat);
+    }
 }

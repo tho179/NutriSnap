@@ -155,6 +155,47 @@ public class MealController {
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
 
+    public void getMealsByType(String userId, String date, String mealType, OnMealsLoadedListener listener) {
+        db.collection("users").document(userId)
+                .collection("daily_logs").document(date)
+                .collection("meals")
+                .whereEqualTo("mealType", mealType)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<MealRecord> meals = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        MealRecord meal = doc.toObject(MealRecord.class);
+                        if (meal != null) {
+                            meal.setId(doc.getId());
+                            meals.add(meal);
+                        }
+                    }
+                    listener.onSuccess(meals);
+                })
+                .addOnFailureListener(e -> listener.onError(e.getMessage()));
+    }
+
+    public void deleteMeal(String userId, String date, MealRecord meal, MealCallback callback) {
+        WriteBatch batch = db.batch();
+        DocumentReference mealRef = db.collection("users").document(userId)
+                .collection("daily_logs").document(date)
+                .collection("meals").document(meal.getId());
+
+        batch.delete(mealRef);
+        
+        // Trừ bớt calo và dinh dưỡng trong summary
+        updateDailySummary(batch, userId, date, meal.getFoods(), -1, meal.getMealType());
+
+        batch.commit()
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
+
+    public interface OnMealsLoadedListener {
+        void onSuccess(List<MealRecord> meals);
+        void onError(String error);
+    }
+
     private void updateDailySummary(WriteBatch batch, String userId, String date, List<FoodItem> foods, int multiplier, String mealType) {
         double cal = 0, pro = 0, carb = 0, fat = 0;
         for (FoodItem f : foods) {

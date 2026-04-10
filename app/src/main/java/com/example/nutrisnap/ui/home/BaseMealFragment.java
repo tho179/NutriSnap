@@ -41,17 +41,23 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public abstract class BaseMealFragment extends Fragment {
 
     protected MealController mealController;
     protected List<FoodItem> currentFoodList = new ArrayList<>();
+    protected List<FoodItem> existingFoods = new ArrayList<>();
+    protected Map<FoodItem, Uri> foodImageMap = new HashMap<>();
+    protected List<MealRecord> loadedMealsFromDB = new ArrayList<>();
     protected LinearLayout layoutFoodList;
     private String currentPhotoPath;
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
+    private boolean isLoadedFromDB = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,25 +103,97 @@ public abstract class BaseMealFragment extends Fragment {
             btnSave.setOnClickListener(v -> saveMeal());
         }
 
+        displayCurrentFoods();
+
+        if (!isLoadedFromDB) {
+            loadExistingMeals();
+        }
+
         getParentFragmentManager().setFragmentResultListener("add_food_request", this, (requestKey, bundle) -> {
             String name = bundle.getString("food_name");
             int kcal = bundle.getInt("food_kcal");
             double protein = bundle.getDouble("food_protein", 0);
             double carbs = bundle.getDouble("food_carbs", 0);
             double fat = bundle.getDouble("food_fat", 0);
+            // Lấy Uri ảnh từ màn hình Analysis gửi về
             Uri imageUri = bundle.getParcelable("food_image");
             
             FoodItem newItem = new FoodItem(name, 1, kcal, protein, carbs, fat);
-            addFoodToUI(newItem, imageUri);
+            addFoodToUI(newItem, imageUri, null);
+        });
+    }
+
+    private void displayCurrentFoods() {
+        if (layoutFoodList == null) return;
+        layoutFoodList.removeAllViews();
+        
+        List<FoodItem> itemsToDisplay = new ArrayList<>(currentFoodList);
+        currentFoodList.clear(); 
+        
+        for (FoodItem food : itemsToDisplay) {
+            MealRecord parent = findParentMeal(food);
+            addFoodToUI(food, foodImageMap.get(food), parent);
+        }
+    }
+
+    private MealRecord findParentMeal(FoodItem food) {
+        for (MealRecord meal : loadedMealsFromDB) {
+            if (meal.getFoods() != null && meal.getFoods().contains(food)) {
+                return meal;
+            }
+        }
+        return null;
+    }
+
+    private void loadExistingMeals() {
+        String userId = FirebaseAuth.getInstance().getUid();
+        if (userId == null) return;
+
+        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        mealController.getMealsByType(userId, date, getMealType(), new MealController.OnMealsLoadedListener() {
+            @Override
+            public void onSuccess(List<MealRecord> meals) {
+                if (!isAdded() || getContext() == null) return;
+                
+                isLoadedFromDB = true;
+                loadedMealsFromDB.clear();
+                loadedMealsFromDB.addAll(meals);
+                
+                existingFoods.clear();
+                for (MealRecord meal : meals) {
+                    if (meal.getFoods() != null) {
+                        existingFoods.addAll(meal.getFoods());
+                        for (FoodItem food : meal.getFoods()) {
+                            if (!currentFoodList.contains(food)) {
+                                addFoodToUI(food, null, meal);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "Không thể tải danh sách món ăn: " + error, Toast.LENGTH_SHORT).show();
+                }
+            }
         });
     }
 
     protected abstract String getMealType();
 
-    protected void addFoodToUI(FoodItem foodItem, Uri imageUri) {
+    protected void addFoodToUI(FoodItem foodItem, Uri imageUri, MealRecord parentMeal) {
         if (layoutFoodList == null) return;
         
-        currentFoodList.add(foodItem);
+        if (!currentFoodList.contains(foodItem)) {
+            currentFoodList.add(foodItem);
+        }
+        
+        // Lưu ảnh vào map để duy trì khi refresh UI
+        if (imageUri != null) {
+            foodImageMap.put(foodItem, imageUri);
+        }
         
         View itemView = LayoutInflater.from(getContext()).inflate(R.layout.item_food_row, layoutFoodList, false);
         
@@ -126,53 +204,91 @@ public abstract class BaseMealFragment extends Fragment {
 
         tvName.setText(foodItem.getName());
         tvKcal.setText(String.format(Locale.getDefault(), "%d kcal", (int)foodItem.getCalories()));
-        if (imageUri != null) imgFood.setImageURI(imageUri);
-
-        itemView.setOnClickListener(v -> {
-            MealRecord singleMeal = new MealRecord(getMealType(), System.currentTimeMillis(), Collections.singletonList(foodItem));
-            layoutFoodList.removeView(itemView);
-            currentFoodList.remove(foodItem);
-            onImageAnalyzed(v, imageUri, singleMeal);
-        });
+        
+        // CẬP NHẬT TẠI ĐÂY: Sử dụng ảnh từ tham số hoặc từ map lưu trữ
+        Uri displayUri = (imageUri != null) ? imageUri : foodImageMap.get(foodItem);
+        if (displayUri != null) {
+            imgFood.setImageURI(displayUri);
+        } else {
+            imgFood.setImageResource(R.drawable.ic_food_placeholder);
+        }
 
         btnDelete.setOnClickListener(v -> {
             showDeleteConfirmationDialog(() -> {
-                layoutFoodList.removeView(itemView);
-                currentFoodList.remove(foodItem);
+                if (parentMeal != null && parentMeal.getId() != null) {
+                    deleteMealFromFirestore(parentMeal, foodItem, itemView);
+                } else {
+                    layoutFoodList.removeView(itemView);
+                    currentFoodList.remove(foodItem);
+                    foodImageMap.remove(foodItem);
+                }
             });
         });
 
         layoutFoodList.addView(itemView);
     }
 
-    protected void saveMeal() {
-        if (currentFoodList.isEmpty()) {
-            Toast.makeText(getContext(), "Vui lòng thêm ít nhất một món ăn", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    private void deleteMealFromFirestore(MealRecord meal, FoodItem foodItem, View itemView) {
         String userId = FirebaseAuth.getInstance().getUid();
-        if (userId == null) {
-            Toast.makeText(getContext(), "Chưa đăng nhập", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (userId == null) return;
 
         String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        MealRecord mealRecord = new MealRecord(getMealType(), System.currentTimeMillis(), currentFoodList);
-
-        mealController.addMeal(userId, date, mealRecord, new MealCallback() {
+        
+        mealController.deleteMeal(userId, date, meal, new MealCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(getContext(), "Lưu bữa ăn thành công!", Toast.LENGTH_SHORT).show();
-                // We don't have a view here, but we can try getting it from fragment view
-                if (getView() != null) {
-                    Navigation.findNavController(getView()).popBackStack();
+                if (isAdded()) {
+                    layoutFoodList.removeView(itemView);
+                    currentFoodList.remove(foodItem);
+                    existingFoods.remove(foodItem);
+                    foodImageMap.remove(foodItem);
+                    Toast.makeText(getContext(), "Đã xóa món ăn", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
-                Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "Lỗi khi xóa: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    protected void saveMeal() {
+        List<FoodItem> newFoods = new ArrayList<>();
+        for (FoodItem item : currentFoodList) {
+            if (!existingFoods.contains(item)) {
+                newFoods.add(item);
+            }
+        }
+
+        if (newFoods.isEmpty()) {
+            Toast.makeText(getContext(), "Không có món mới để lưu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = FirebaseAuth.getInstance().getUid();
+        if (userId == null) return;
+
+        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        MealRecord mealRecord = new MealRecord(getMealType(), System.currentTimeMillis(), newFoods);
+
+        mealController.addMeal(userId, date, mealRecord, new MealCallback() {
+            @Override
+            public void onSuccess() {
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "Lưu bữa ăn thành công!", Toast.LENGTH_SHORT).show();
+                    isLoadedFromDB = false;
+                    loadExistingMeals();
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,10 @@ public class ChatbotFragment extends Fragment {
     private OkHttpClient client;
     private EventSource.Factory eventSourceFactory;
     private String currentSessionId;
+
+    // THAY ĐỔI TẠI ĐÂY: Dùng IP của máy tính (Gõ ipconfig trong cmd để xem IPv4)
+    private static final String SERVER_IP = "192.168.1.3";
+    private static final String BASE_URL = "http://" + SERVER_IP + ":8080/api/chat/stream";
 
     @Nullable
     @Override
@@ -117,16 +122,19 @@ public class ChatbotFragment extends Fragment {
 
         RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.parse("application/json"));
 
-        // LƯU Ý ĐỊA CHỈ IP: 10.0.2.2 là localhost của máy tính khi chạy trên máy ảo Android (Emulator)
-        // Nếu bạn cắm điện thoại thật để chạy, phải thay bằng IPv4 của máy tính (VD: 192.168.1.x)
         Request request = new Request.Builder()
-                .url("http://10.0.2.2:8080/api/chat/stream")
+                .url(BASE_URL)
                 .addHeader("Accept", "text/event-stream") // Bắt buộc cho SSE
                 .post(body)
                 .build();
 
         // Lắng nghe dữ liệu chảy về
         eventSourceFactory.newEventSource(request, new EventSourceListener() {
+            @Override
+            public void onOpen(@NonNull EventSource eventSource, @NonNull Response response) {
+                Log.d("ChatbotFragment", "SSE Connection Opened");
+            }
+
             @Override
             public void onEvent(@Nullable EventSource eventSource, @Nullable String id, @Nullable String type, @NonNull String data) {
                 // onEvent chạy ngầm, muốn cập nhật UI (TextView) phải đẩy lên Main Thread
@@ -140,7 +148,9 @@ public class ChatbotFragment extends Fragment {
                                 scrollToBottom();         // Kéo cuộn màn hình xuống
                             }
                         } catch (JSONException e) {
-                            e.printStackTrace();
+                            // Nếu data không phải JSON, có thể là text thô
+                            botTextView.append(data);
+                            scrollToBottom();
                         }
                     });
                 }
@@ -148,11 +158,12 @@ public class ChatbotFragment extends Fragment {
 
             @Override
             public void onClosed(@NonNull EventSource eventSource) {
-                // Xong luồng dữ liệu
+                Log.d("ChatbotFragment", "SSE Connection Closed");
             }
 
             @Override
             public void onFailure(@NonNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
+                Log.e("ChatbotFragment", "SSE Error", t);
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         Toast.makeText(getContext(), "Lỗi kết nối AI!", Toast.LENGTH_SHORT).show();
