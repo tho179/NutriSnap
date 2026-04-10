@@ -50,7 +50,7 @@ public class ChatbotFragment extends Fragment {
     private String currentSessionId;
 
     // THAY ĐỔI TẠI ĐÂY: Dùng IP của máy tính (Gõ ipconfig trong cmd để xem IPv4)
-    private static final String SERVER_IP = "192.168.1.3";
+    private static final String SERVER_IP = "172.22.48.1";
     private static final String BASE_URL = "http://" + SERVER_IP + ":8080/api/chat/stream";
 
     @Nullable

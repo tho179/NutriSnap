@@ -86,11 +86,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDefaultReminders() {
-        NotificationHelper.scheduleNotification(this, "Bữa sáng tới rồi!", "Đừng quên chụp ảnh bữa sáng để theo dõi calo nhé 🥗", 1001, 8, 0);
+        NotificationHelper.scheduleNotification(this, "Bữa sáng tới rồi!", "Đừng quên chụp ảnh bữa sáng để theo dõi calo nhé 🥗", 1001, 7, 0);
         NotificationHelper.scheduleNotification(this, "Đã đến giờ ăn trưa", "Một bữa trưa lành mạnh đang chờ bạn ghi lại đó!", 1002, 12, 0);
-        NotificationHelper.scheduleNotification(this, "Ghi lại bữa tối thôi", "Kết thúc ngày bằng việc ghi chép bữa tối đầy đủ nào 🌙", 1003, 19, 0);
-        NotificationHelper.scheduleNotification(this, "Kiểm tra cân nặng", "Hôm nay bạn cảm thấy thế nào? Hãy cập nhật cân nặng mới nhé ⚖️", 1004, 9, 30);
-        NotificationHelper.scheduleNotification(this, "Chào ngày mới!", "Một cơ thể khỏe mạnh bắt đầu từ một bữa ăn lành mạnh. Cố lên! 💪", 1005, 21, 02);
+        NotificationHelper.scheduleNotification(this, "Ghi lại bữa tối thôi", "Kết thúc ngày bằng việc ghi chép bữa tối đầy đủ nào 🌙", 1003, 19, 30);
+        NotificationHelper.scheduleNotification(this, "Kiểm tra cân nặng", "Hôm nay bạn cảm thấy thế nào? Hãy cập nhật cân nặng mới nhé ⚖️", 1004, 21, 0);
+        NotificationHelper.scheduleNotification(this, "Chào ngày mới!", "Một cơ thể khỏe mạnh bắt đầu từ một bữa ăn lành mạnh. Cố lên! 💪", 1005, 6, 30);
     }
 
     public void navigateToHome() {

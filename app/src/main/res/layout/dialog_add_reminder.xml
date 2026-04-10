@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Thêm nhắc nhở mới"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/edt_reminder_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nội dung nhắc nhở"
+        android:inputType="textCapSentences"
+        android:minHeight="48dp"
+        android:layout_marginBottom="12dp"
+        android:autofillHints="none"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:id="@+id/tv_reminder_date"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Chọn ngày"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:drawableStart="@drawable/ic_calendar"
+            android:drawablePadding="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_reminder_time"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Chọn giờ"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:drawableStart="@drawable/ic_plan_check"
+            android:drawablePadding="8dp"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_save_reminder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lưu nhắc nhở"
+        android:backgroundTint="@color/primary_green"
+        android:textColor="@color/white"/>
+
+</LinearLayout>
