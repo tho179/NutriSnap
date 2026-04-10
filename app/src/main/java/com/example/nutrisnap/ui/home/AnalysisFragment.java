@@ -36,7 +36,9 @@ public class AnalysisFragment extends Fragment {
             double protein = getArguments().getDouble("food_protein", 0);
             double carbs = getArguments().getDouble("food_carbs", 0);
             double fat = getArguments().getDouble("food_fat", 0);
-            currentFood = new FoodItem(name, 1, kcal, protein, carbs, fat);
+            Uri imageUri = getArguments().getParcelable("image_uri");
+            String imageUrl = imageUri != null ? imageUri.toString() : null;
+            currentFood = new FoodItem(name, 1, kcal, protein, carbs, fat, imageUrl);
         }
     }
 

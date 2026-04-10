@@ -10,19 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import com.example.nutrisnap.R;
 
 public class HelpDetailFragment extends Fragment {
 
-    private static final String ARG_CONTENT = "help_content";
+    public static final String ARG_CONTENT = "help_content";
 
-    public static HelpDetailFragment newInstance(String content) {
-        HelpDetailFragment fragment = new HelpDetailFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_CONTENT, content);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Nullable
     @Override
@@ -32,7 +26,7 @@ public class HelpDetailFragment extends Fragment {
         ImageView btnBack = view.findViewById(R.id.btn_back_help_detail);
         TextView tvContent = view.findViewById(R.id.tv_help_content);
 
-        btnBack.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
+        btnBack.setOnClickListener(v -> Navigation.findNavController(v).navigateUp());
 
         if (getArguments() != null) {
             String content = getArguments().getString(ARG_CONTENT);

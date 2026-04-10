@@ -1,5 +1,7 @@
 package com.example.nutrisnap.controller;
 
+import android.net.Uri;
+
 import com.example.nutrisnap.model.AIOnResultListener;
 import com.example.nutrisnap.model.FoodItem;
 import com.example.nutrisnap.model.MealCallback;
@@ -131,7 +133,7 @@ public class MealController {
                         }
                     }
                     
-                    items.add(new FoodItem(foodName, 1, calories, protein, carbs, fat));
+                    items.add(new FoodItem(foodName, 1, calories, protein, carbs, fat, ""));
                 }
             }
         }
@@ -237,7 +239,7 @@ public class MealController {
                 JSONObject segment = segmentationResults.getJSONObject(i);
                 JSONArray recognitionResults = segment.optJSONArray("recognition_results");
                 if (recognitionResults != null && recognitionResults.length() > 0) {
-                    items.add(new FoodItem(recognitionResults.getJSONObject(0).optString("name", "Unknown"), 1, 0, 0, 0, 0));
+                    items.add(new FoodItem(recognitionResults.getJSONObject(0).optString("name", "Unknown"), 1, 0, 0, 0, 0, ""));
                 }
             }
         }

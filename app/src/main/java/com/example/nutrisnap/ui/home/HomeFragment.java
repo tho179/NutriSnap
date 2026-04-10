@@ -214,7 +214,9 @@ public class HomeFragment extends Fragment {
         EditText edtAmount = dialogView.findViewById(R.id.edt_water_amount);
         Button btnDrink = dialogView.findViewById(R.id.btn_drink_dialog);
         Button btnRemove = dialogView.findViewById(R.id.btn_remove_water_dialog);
-        Button btnCancel = dialog.findViewById(R.id.btn_cancel_dialog);
+
+        Button btnCancel = dialogView.findViewById(R.id.btn_cancel_dialog);
+
         ImageView btnClose = dialogView.findViewById(R.id.btn_close_dialog);
 
         btnDrink.setOnClickListener(v -> {

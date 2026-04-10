@@ -117,8 +117,9 @@ public abstract class BaseMealFragment extends Fragment {
             double fat = bundle.getDouble("food_fat", 0);
             // Lấy Uri ảnh từ màn hình Analysis gửi về
             Uri imageUri = bundle.getParcelable("food_image");
-            
-            FoodItem newItem = new FoodItem(name, 1, kcal, protein, carbs, fat);
+            String imageUrl = (imageUri != null) ? imageUri.toString() : "";
+
+            FoodItem newItem = new FoodItem(name, 1, kcal, protein, carbs, fat, imageUrl);
             addFoodToUI(newItem, imageUri, null);
         });
     }
@@ -126,10 +127,10 @@ public abstract class BaseMealFragment extends Fragment {
     private void displayCurrentFoods() {
         if (layoutFoodList == null) return;
         layoutFoodList.removeAllViews();
-        
+
         List<FoodItem> itemsToDisplay = new ArrayList<>(currentFoodList);
-        currentFoodList.clear(); 
-        
+        currentFoodList.clear();
+
         for (FoodItem food : itemsToDisplay) {
             MealRecord parent = findParentMeal(food);
             addFoodToUI(food, foodImageMap.get(food), parent);
@@ -154,18 +155,20 @@ public abstract class BaseMealFragment extends Fragment {
             @Override
             public void onSuccess(List<MealRecord> meals) {
                 if (!isAdded() || getContext() == null) return;
-                
+
                 isLoadedFromDB = true;
                 loadedMealsFromDB.clear();
                 loadedMealsFromDB.addAll(meals);
-                
+
                 existingFoods.clear();
                 for (MealRecord meal : meals) {
                     if (meal.getFoods() != null) {
                         existingFoods.addAll(meal.getFoods());
                         for (FoodItem food : meal.getFoods()) {
                             if (!currentFoodList.contains(food)) {
-                                addFoodToUI(food, null, meal);
+                                String imageUrl = food.getImageUrl();
+                                Uri imageUri = (imageUrl != null && !imageUrl.isEmpty()) ? Uri.parse(imageUrl) : null;
+                                addFoodToUI(food, imageUri, meal);
                             }
                         }
                     }
@@ -185,18 +188,18 @@ public abstract class BaseMealFragment extends Fragment {
 
     protected void addFoodToUI(FoodItem foodItem, Uri imageUri, MealRecord parentMeal) {
         if (layoutFoodList == null) return;
-        
+
         if (!currentFoodList.contains(foodItem)) {
             currentFoodList.add(foodItem);
         }
-        
+
         // Lưu ảnh vào map để duy trì khi refresh UI
         if (imageUri != null) {
             foodImageMap.put(foodItem, imageUri);
         }
-        
+
         View itemView = LayoutInflater.from(getContext()).inflate(R.layout.item_food_row, layoutFoodList, false);
-        
+
         TextView tvName = itemView.findViewById(R.id.tv_food_name);
         TextView tvKcal = itemView.findViewById(R.id.tv_food_kcal);
         ImageView imgFood = itemView.findViewById(R.id.img_food_icon);
@@ -204,8 +207,7 @@ public abstract class BaseMealFragment extends Fragment {
 
         tvName.setText(foodItem.getName());
         tvKcal.setText(String.format(Locale.getDefault(), "%d kcal", (int)foodItem.getCalories()));
-        
-        // CẬP NHẬT TẠI ĐÂY: Sử dụng ảnh từ tham số hoặc từ map lưu trữ
+
         Uri displayUri = (imageUri != null) ? imageUri : foodImageMap.get(foodItem);
         if (displayUri != null) {
             imgFood.setImageURI(displayUri);
@@ -225,6 +227,21 @@ public abstract class BaseMealFragment extends Fragment {
             });
         });
 
+        itemView.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putString("food_name", foodItem.getName());
+            args.putInt("food_kcal", (int) foodItem.getCalories());
+            args.putDouble("food_protein", foodItem.getProtein());
+            args.putDouble("food_carbs", foodItem.getCarbs());
+            args.putDouble("food_fat", foodItem.getFat());
+
+            if (displayUri != null) {
+                args.putParcelable("image_uri", displayUri);
+            }
+
+            Navigation.findNavController(v).navigate(R.id.nav_analysis, args);
+        });
+
         layoutFoodList.addView(itemView);
     }
 
@@ -233,7 +250,7 @@ public abstract class BaseMealFragment extends Fragment {
         if (userId == null) return;
 
         String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        
+
         mealController.deleteMeal(userId, date, meal, new MealCallback() {
             @Override
             public void onSuccess() {
@@ -256,30 +273,36 @@ public abstract class BaseMealFragment extends Fragment {
     }
 
     protected void saveMeal() {
-        List<FoodItem> newFoods = new ArrayList<>();
-        for (FoodItem item : currentFoodList) {
-            if (!existingFoods.contains(item)) {
-                newFoods.add(item);
-            }
-        }
-
-        if (newFoods.isEmpty()) {
-            Toast.makeText(getContext(), "Không có món mới để lưu", Toast.LENGTH_SHORT).show();
+        if (currentFoodList == null || currentFoodList.isEmpty()) {
+            Toast.makeText(getContext(), "Danh sách món ăn đang trống, vui lòng thêm món!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String userId = FirebaseAuth.getInstance().getUid();
-        if (userId == null) return;
+        if (userId == null) {
+            Toast.makeText(getContext(), "Vui lòng đăng nhập để lưu dữ liệu!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        MealRecord mealRecord = new MealRecord(getMealType(), System.currentTimeMillis(), newFoods);
+
+        MealRecord mealRecord = new MealRecord(getMealType(), System.currentTimeMillis(), new ArrayList<>(currentFoodList));
+
+        ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setMessage("Đang lưu bữa ăn...");
+        progressDialog.show();
 
         mealController.addMeal(userId, date, mealRecord, new MealCallback() {
             @Override
             public void onSuccess() {
                 if (isAdded()) {
-                    Toast.makeText(getContext(), "Lưu bữa ăn thành công!", Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(), "Lưu bữa " + getMealType() + " thành công!", Toast.LENGTH_SHORT).show();
+
                     isLoadedFromDB = false;
+
+                    currentFoodList.clear();
+                    foodImageMap.clear();
                     loadExistingMeals();
                 }
             }
@@ -287,7 +310,8 @@ public abstract class BaseMealFragment extends Fragment {
             @Override
             public void onFailure(Exception e) {
                 if (isAdded()) {
-                    Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(), "Lỗi khi lưu: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -346,12 +370,15 @@ public abstract class BaseMealFragment extends Fragment {
 
         try {
             File imageFile = getFileFromUri(uri);
+            // Use local file URI to avoid SecurityException when passing it between fragments
+            Uri localUri = Uri.fromFile(imageFile);
+            
             mealController.recognizeMealFromImage(imageFile, new AIOnResultListener() {
                 @Override
                 public void onSuccess(MealRecord mealRecord) {
                     progressDialog.dismiss();
                     if (getView() != null) {
-                        onImageAnalyzed(getView(), uri, mealRecord);
+                        onImageAnalyzed(getView(), localUri, mealRecord);
                     }
                 }
 
@@ -368,7 +395,11 @@ public abstract class BaseMealFragment extends Fragment {
     }
 
     private File getFileFromUri(Uri uri) throws IOException {
-        File tempFile = new File(requireContext().getCacheDir(), "temp_image.jpg");
+        // Create a unique file name in cache directory
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        File storageDir = requireContext().getCacheDir();
+        File tempFile = File.createTempFile("Picked_" + timeStamp + "_", ".jpg", storageDir);
+
         try (InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
              FileOutputStream outputStream = new FileOutputStream(tempFile)) {
             byte[] buffer = new byte[1024];

@@ -12,7 +12,20 @@
           "package_name": "com.example.nutrisnap"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "76232956240-dojcrmt7e96ljg7fhnd1omap5uboedd0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nutrisnap",
+            "certificate_hash": "ec0c61ab0934704fb9ead45a461cebf5aeb84b12"
+          }
+        },
+        {
+          "client_id": "76232956240-4f3pjvq2ba7qfjaa5u8s4uk9ga17afsc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB32Hlp83lxAs5d6yukiFjQtHA7OGds_PA"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "76232956240-4f3pjvq2ba7qfjaa5u8s4uk9ga17afsc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

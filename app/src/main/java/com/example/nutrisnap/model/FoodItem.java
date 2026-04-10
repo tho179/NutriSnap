@@ -10,15 +10,18 @@ public class FoodItem {
     private double carbs;
     private double fat;
 
+    private String imageUrl;
+
     public FoodItem() {}
 
-    public FoodItem(String name, int amount, double calories, double protein, double carbs, double fat) {
+    public FoodItem(String name, int amount, double calories, double protein, double carbs, double fat, String imageUrl) {
         this.name = name;
         this.amount = amount;
         this.calories = calories;
         this.protein = protein;
         this.carbs = carbs;
         this.fat = fat;
+        this.imageUrl = imageUrl;
     }
 
     // --- Getters & Setters ---
@@ -39,6 +42,14 @@ public class FoodItem {
 
     public double getFat() { return fat; }
     public void setFat(double fat) { this.fat = fat; }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
 
     @Override
     public boolean equals(Object o) {
