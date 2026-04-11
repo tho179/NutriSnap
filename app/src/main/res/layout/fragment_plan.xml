@@ -103,7 +103,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="2500"
+                            android:text="--"
                             android:textColor="@color/black"
                             android:textSize="22sp"
                             android:textStyle="bold" />
@@ -127,19 +127,19 @@
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical">
                             <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/bg_circle_green" />
                             <TextView android:id="@+id/tv_plan_label_carbs" android:layout_width="80dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/carbs" android:textColor="@color/black" android:textStyle="bold" />
-                            <TextView android:id="@+id/tv_plan_target_carbs" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="224g" android:textColor="@color/black" android:textStyle="bold" />
+                            <TextView android:id="@+id/tv_plan_target_carbs" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--g" android:textColor="@color/black" android:textStyle="bold" />
                         </LinearLayout>
 
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center_vertical">
                             <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/bg_circle_green" />
                             <TextView android:id="@+id/tv_plan_label_protein" android:layout_width="80dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/protein" android:textColor="@color/black" android:textStyle="bold" />
-                            <TextView android:id="@+id/tv_plan_target_protein" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="128g" android:textColor="@color/black" android:textStyle="bold" />
+                            <TextView android:id="@+id/tv_plan_target_protein" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--g" android:textColor="@color/black" android:textStyle="bold" />
                         </LinearLayout>
 
                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center_vertical">
                             <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/bg_circle_green" />
                             <TextView android:id="@+id/tv_plan_label_fat" android:layout_width="80dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/fat" android:textColor="@color/black" android:textStyle="bold" />
-                            <TextView android:id="@+id/tv_plan_target_fat" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="128g" android:textColor="@color/black" android:textStyle="bold" />
+                            <TextView android:id="@+id/tv_plan_target_fat" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--g" android:textColor="@color/black" android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -172,125 +172,29 @@
                     <!-- Calories Progress -->
                     <TextView android:id="@+id/tv_plan_label_calories" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/calories" android:textColor="@color/black" android:textStyle="bold" />
                     <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
-                        <ProgressBar android:id="@+id/pb_plan_kcal" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="12dp" android:layout_toStartOf="@id/tv_plan_kcal_val" android:layout_marginEnd="12dp" android:layout_centerVertical="true" android:progress="48" android:progressDrawable="@drawable/custom_progress_meal" />
-                        <TextView android:id="@+id/tv_plan_kcal_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="1200/2500" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" />
+                        <ProgressBar android:id="@+id/pb_plan_kcal" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="12dp" android:layout_toStartOf="@id/tv_plan_kcal_val" android:layout_marginEnd="12dp" android:layout_centerVertical="true" android:progressDrawable="@drawable/custom_progress_meal" />
+                        <TextView android:id="@+id/tv_plan_kcal_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="--/--" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" />
                     </RelativeLayout>
 
                     <!-- Carbs Progress -->
                     <TextView android:id="@+id/tv_plan_label_carbs_progress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/carbs" android:textColor="@color/black" android:textStyle="bold" />
                     <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
-                        <ProgressBar android:id="@+id/pb_plan_carbs" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="12dp" android:layout_toStartOf="@id/tv_plan_carbs_val" android:layout_marginEnd="12dp" android:layout_centerVertical="true" android:progress="18" android:progressDrawable="@drawable/custom_progress_meal" />
-                        <TextView android:id="@+id/tv_plan_carbs_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="40/224g" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" />
+                        <ProgressBar android:id="@+id/pb_plan_carbs" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="12dp" android:layout_toStartOf="@id/tv_plan_carbs_val" android:layout_marginEnd="12dp" android:layout_centerVertical="true" android:progressDrawable="@drawable/custom_progress_meal" />
+                        <TextView android:id="@+id/tv_plan_carbs_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="--/--g" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" />
                     </RelativeLayout>
 
                     <!-- Protein Progress -->
                     <TextView android:id="@+id/tv_plan_label_protein_progress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/protein" android:textColor="@color/black" android:textStyle="bold" />
                     <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
-                        <ProgressBar android:id="@+id/pb_plan_protein" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="12dp" android:layout_toStartOf="@id/tv_plan_protein_val" android:layout_marginEnd="12dp" android:layout_centerVertical="true" android:progress="62" android:progressDrawable="@drawable/custom_progress_meal" />
-                        <TextView android:id="@+id/tv_plan_protein_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="80/128g" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" />
+                        <ProgressBar android:id="@+id/pb_plan_protein" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="12dp" android:layout_toStartOf="@id/tv_plan_protein_val" android:layout_marginEnd="12dp" android:layout_centerVertical="true" android:progressDrawable="@drawable/custom_progress_meal" />
+                        <TextView android:id="@+id/tv_plan_protein_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="--/--g" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" />
                     </RelativeLayout>
 
                     <!-- Fat Progress -->
                     <TextView android:id="@+id/tv_plan_label_fat_progress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/fat" android:textColor="@color/black" android:textStyle="bold" />
                     <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
-                        <ProgressBar android:id="@+id/pb_plan_fat" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="12dp" android:layout_toStartOf="@id/tv_plan_fat_val" android:layout_marginEnd="12dp" android:layout_centerVertical="true" android:progress="78" android:progressDrawable="@drawable/custom_progress_meal" />
-                        <TextView android:id="@+id/tv_plan_fat_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="100/128g" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" />
-                    </RelativeLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Meal Recommendation Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:id="@+id/tv_plan_recommendation_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="@string/meal_recommendation"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <View
-                        android:layout_width="200dp"
-                        android:layout_height="1dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="12dp"
-                        android:background="#EEEEEE" />
-
-                    <!-- Breakfast Recommendation -->
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp">
-                        <ImageView android:id="@+id/iv_rec_breakfast" android:layout_width="70dp" android:layout_height="70dp" android:src="@drawable/img_breakfast" />
-                        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_toEndOf="@id/iv_rec_breakfast" android:orientation="vertical">
-                            <TextView android:id="@+id/tv_plan_rec_breakfast_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Breakfast (450 kcal)" android:textColor="@color/black" android:textStyle="bold" />
-                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:layout_marginStart="20dp" android:gravity="center_vertical">
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_circle_green" />
-                                <TextView android:id="@+id/tv_plan_rec_breakfast_item1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/bread" android:textColor="@color/black" android:textStyle="bold" android:textSize="13sp"/>
-                            </LinearLayout>
-                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:layout_marginStart="20dp" android:gravity="center_vertical">
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_circle_green" />
-                                <TextView android:id="@+id/tv_plan_rec_breakfast_item2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/egg" android:textColor="@color/black" android:textStyle="bold" android:textSize="13sp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </RelativeLayout>
-
-                    <!-- Lunch Recommendation -->
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp">
-                        <ImageView android:id="@+id/iv_rec_lunch" android:layout_width="70dp" android:layout_height="70dp" android:src="@drawable/img_lunch" />
-                        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_toEndOf="@id/iv_rec_lunch" android:orientation="vertical">
-                            <TextView android:id="@+id/tv_plan_rec_lunch_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lunch (800 kcal)" android:textColor="@color/black" android:textStyle="bold" />
-                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:layout_marginStart="20dp" android:gravity="center_vertical">
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_circle_green" />
-                                <TextView android:id="@+id/tv_plan_rec_lunch_item1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/pho" android:textColor="@color/black" android:textStyle="bold" android:textSize="13sp"/>
-                            </LinearLayout>
-                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:layout_marginStart="20dp" android:gravity="center_vertical">
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_circle_green" />
-                                <TextView android:id="@+id/tv_plan_rec_lunch_item2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/salad" android:textColor="@color/black" android:textStyle="bold" android:textSize="13sp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </RelativeLayout>
-
-                    <!-- Dinner Recommendation -->
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp">
-                        <ImageView android:id="@+id/iv_rec_dinner" android:layout_width="70dp" android:layout_height="70dp" android:src="@drawable/img_dinner" />
-                        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_toEndOf="@id/iv_rec_dinner" android:orientation="vertical">
-                            <TextView android:id="@+id/tv_plan_rec_dinner_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dinner (800 kcal)" android:textColor="@color/black" android:textStyle="bold" />
-                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:layout_marginStart="20dp" android:gravity="center_vertical">
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_circle_green" />
-                                <TextView android:id="@+id/tv_plan_rec_dinner_item1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/brown_rice" android:textColor="@color/black" android:textStyle="bold" android:textSize="13sp"/>
-                            </LinearLayout>
-                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:layout_marginStart="20dp" android:gravity="center_vertical">
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_circle_green" />
-                                <TextView android:id="@+id/tv_plan_rec_dinner_item2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/egg" android:textColor="@color/black" android:textStyle="bold" android:textSize="13sp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </RelativeLayout>
-
-                    <!-- Snack Recommendation -->
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp">
-                        <ImageView android:id="@+id/iv_rec_snack" android:layout_width="70dp" android:layout_height="70dp" android:src="@drawable/img_snack" />
-                        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_toEndOf="@id/iv_rec_snack" android:orientation="vertical">
-                            <TextView android:id="@+id/tv_plan_rec_snack_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Snack (450 kcal)" android:textColor="@color/black" android:textStyle="bold" />
-                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:layout_marginStart="20dp" android:gravity="center_vertical">
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_circle_green" />
-                                <TextView android:id="@+id/tv_plan_rec_snack_item1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/greek_yogurt" android:textColor="@color/black" android:textStyle="bold" android:textSize="13sp"/>
-                            </LinearLayout>
-                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:layout_marginStart="20dp" android:gravity="center_vertical">
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_circle_green" />
-                                <TextView android:id="@+id/tv_plan_rec_snack_item2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="@string/almonds" android:textColor="@color/black" android:textStyle="bold" android:textSize="13sp"/>
-                            </LinearLayout>
-                        </LinearLayout>
+                        <ProgressBar android:id="@+id/pb_plan_fat" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="12dp" android:layout_toStartOf="@id/tv_plan_fat_val" android:layout_marginEnd="12dp" android:layout_centerVertical="true" android:progressDrawable="@drawable/custom_progress_meal" />
+                        <TextView android:id="@+id/tv_plan_fat_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="--/--g" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -115,7 +116,6 @@ public abstract class BaseMealFragment extends Fragment {
             double protein = bundle.getDouble("food_protein", 0);
             double carbs = bundle.getDouble("food_carbs", 0);
             double fat = bundle.getDouble("food_fat", 0);
-            // Lấy Uri ảnh từ màn hình Analysis gửi về
             Uri imageUri = bundle.getParcelable("food_image");
             String imageUrl = (imageUri != null) ? imageUri.toString() : "";
 
@@ -166,13 +166,16 @@ public abstract class BaseMealFragment extends Fragment {
                         existingFoods.addAll(meal.getFoods());
                         for (FoodItem food : meal.getFoods()) {
                             if (!currentFoodList.contains(food)) {
+                                currentFoodList.add(food);
                                 String imageUrl = food.getImageUrl();
-                                Uri imageUri = (imageUrl != null && !imageUrl.isEmpty()) ? Uri.parse(imageUrl) : null;
-                                addFoodToUI(food, imageUri, meal);
+                                if (imageUrl != null && !imageUrl.isEmpty()) {
+                                    foodImageMap.put(food, Uri.parse(imageUrl));
+                                }
                             }
                         }
                     }
                 }
+                displayCurrentFoods();
             }
 
             @Override
@@ -193,7 +196,6 @@ public abstract class BaseMealFragment extends Fragment {
             currentFoodList.add(foodItem);
         }
 
-        // Lưu ảnh vào map để duy trì khi refresh UI
         if (imageUri != null) {
             foodImageMap.put(foodItem, imageUri);
         }
@@ -257,7 +259,10 @@ public abstract class BaseMealFragment extends Fragment {
                 if (isAdded()) {
                     layoutFoodList.removeView(itemView);
                     currentFoodList.remove(foodItem);
-                    existingFoods.remove(foodItem);
+                    loadedMealsFromDB.remove(meal);
+                    if (meal.getFoods() != null) {
+                        existingFoods.removeAll(meal.getFoods());
+                    }
                     foodImageMap.remove(foodItem);
                     Toast.makeText(getContext(), "Đã xóa món ăn", Toast.LENGTH_SHORT).show();
                 }
@@ -273,8 +278,16 @@ public abstract class BaseMealFragment extends Fragment {
     }
 
     protected void saveMeal() {
-        if (currentFoodList == null || currentFoodList.isEmpty()) {
-            Toast.makeText(getContext(), "Danh sách món ăn đang trống, vui lòng thêm món!", Toast.LENGTH_SHORT).show();
+        // Lọc ra các món ăn mới chưa có trong database
+        List<FoodItem> foodsToSave = new ArrayList<>();
+        for (FoodItem food : currentFoodList) {
+            if (!existingFoods.contains(food)) {
+                foodsToSave.add(food);
+            }
+        }
+
+        if (foodsToSave.isEmpty()) {
+            Toast.makeText(getContext(), "Không có món ăn mới để lưu!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -286,10 +299,12 @@ public abstract class BaseMealFragment extends Fragment {
 
         String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        MealRecord mealRecord = new MealRecord(getMealType(), System.currentTimeMillis(), new ArrayList<>(currentFoodList));
+        // Tạo MealRecord chỉ chứa các món mới
+        MealRecord mealRecord = new MealRecord(getMealType(), System.currentTimeMillis(), foodsToSave);
 
         ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setMessage("Đang lưu bữa ăn...");
+        progressDialog.setMessage("Đang lưu món mới...");
+        progressDialog.setCancelable(false);
         progressDialog.show();
 
         mealController.addMeal(userId, date, mealRecord, new MealCallback() {
@@ -297,10 +312,9 @@ public abstract class BaseMealFragment extends Fragment {
             public void onSuccess() {
                 if (isAdded()) {
                     progressDialog.dismiss();
-                    Toast.makeText(getContext(), "Lưu bữa " + getMealType() + " thành công!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Đã lưu thêm món vào bữa " + getMealType(), Toast.LENGTH_SHORT).show();
 
                     isLoadedFromDB = false;
-
                     currentFoodList.clear();
                     foodImageMap.clear();
                     loadExistingMeals();
@@ -370,7 +384,6 @@ public abstract class BaseMealFragment extends Fragment {
 
         try {
             File imageFile = getFileFromUri(uri);
-            // Use local file URI to avoid SecurityException when passing it between fragments
             Uri localUri = Uri.fromFile(imageFile);
             
             mealController.recognizeMealFromImage(imageFile, new AIOnResultListener() {
@@ -395,7 +408,6 @@ public abstract class BaseMealFragment extends Fragment {
     }
 
     private File getFileFromUri(Uri uri) throws IOException {
-        // Create a unique file name in cache directory
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         File storageDir = requireContext().getCacheDir();
         File tempFile = File.createTempFile("Picked_" + timeStamp + "_", ".jpg", storageDir);

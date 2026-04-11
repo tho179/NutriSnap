@@ -12,6 +12,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
@@ -37,6 +38,11 @@ public class DailyController {
         void onFailure(Exception e);
     }
 
+    public interface LastWeightCallback {
+        void onSuccess(float weight);
+        void onFailure(Exception e);
+    }
+
     public void fetchDailySummary(String userId, String date, DailyDataCallback callback) {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -54,7 +60,6 @@ public class DailyController {
                         summary.fatTarget = userDoc.contains("targetFat") ? userDoc.getDouble("targetFat").intValue() : 128;
                         summary.waterTarget = userDoc.contains("targetWater") ? userDoc.getDouble("targetWater").intValue() : 2000;
 
-                        // Set meal targets (could be calculated or from DB)
                         summary.breakfastTarget = (int) (summary.targetCalories * 0.3);
                         summary.lunchTarget = (int) (summary.targetCalories * 0.35);
                         summary.dinnerTarget = (int) (summary.targetCalories * 0.25);
@@ -153,6 +158,26 @@ public class DailyController {
                 .addOnFailureListener(callback::onFailure);
     }
 
+    public void fetchLastKnownWeightBefore(String userId, String beforeDate, LastWeightCallback callback) {
+        db.collection("users").document(userId)
+                .collection("daily_logs")
+                .whereLessThan("date", beforeDate)
+                .orderBy("date", Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
+                        if (doc.contains("weight")) {
+                            callback.onSuccess(doc.getDouble("weight").floatValue());
+                            return;
+                        }
+                    }
+                    callback.onSuccess(0f); // Không tìm thấy
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
     public void updateWaterIntake(String userId, String date, int amountToAdd, UpdateCallback callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("totalWater", FieldValue.increment(amountToAdd));
@@ -167,12 +192,12 @@ public class DailyController {
     public void updateWeight(String userId, String date, float weight, UpdateCallback callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("weight", weight);
+        updates.put("date", date); // Lưu ngày để phục vụ truy vấn lịch sử
 
         db.collection("users").document(userId)
                 .collection("daily_logs").document(date)
                 .set(updates, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> {
-                    // Cập nhật cả ở User document để đồng bộ cân nặng hiện tại
                     db.collection("users").document(userId)
                             .update("weight", weight)
                             .addOnSuccessListener(v -> callback.onSuccess())

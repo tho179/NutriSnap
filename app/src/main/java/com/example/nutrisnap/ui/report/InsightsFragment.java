@@ -117,7 +117,11 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
                         Double w = doc.getDouble("weight");
                         if (w == null) {
                             String wStr = doc.getString("weight");
-                            userWeight = (wStr != null) ? Float.parseFloat(wStr) : 60.0f;
+                            try {
+                                userWeight = (wStr != null) ? Float.parseFloat(wStr) : 60.0f;
+                            } catch (Exception e) {
+                                userWeight = 60.0f;
+                            }
                         } else {
                             userWeight = w.floatValue();
                         }
@@ -272,55 +276,66 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
             }
         }
 
-        dailyController.fetchRangeSummary(userId, dateKeys, new DailyController.DailyListCallback() {
+        // Bước 1: Tìm cân nặng gần nhất TRƯỚC dải thời gian hiển thị
+        dailyController.fetchLastKnownWeightBefore(userId, dateKeys.get(0), new DailyController.LastWeightCallback() {
             @Override
-            public void onSuccess(Map<String, DailySummaryData> dataMap) {
-                if (!isAdded()) return;
-                
-                currentBarEntries.clear();
-                List<Entry> weightEntries = new ArrayList<>();
-                
-                float totalProtein = 0, totalCarbs = 0, totalFat = 0;
-                float lastKnownWeight = userWeight;
-                currentTargetKcal = 2500f; // Mặc định
-
-                for (int i = 0; i < dateKeys.size(); i++) {
-                    DailySummaryData d = dataMap.get(dateKeys.get(i));
-                    
-                    if (d != null) {
-                        currentTargetKcal = d.targetCalories; // Lấy target từ dữ liệu Firestore
+            public void onSuccess(float initialWeight) {
+                // Bước 2: Fetch dữ liệu trong dải thời gian
+                dailyController.fetchRangeSummary(userId, dateKeys, new DailyController.DailyListCallback() {
+                    @Override
+                    public void onSuccess(Map<String, DailySummaryData> dataMap) {
+                        if (!isAdded()) return;
                         
-                        // Calorie data
-                        float cal = d.totalCaloriesIn;
-                        currentBarEntries.add(new BarEntry(i, cal));
+                        currentBarEntries.clear();
+                        List<Entry> weightEntries = new ArrayList<>();
                         
-                        // Nutrient data
-                        if (d.totalCaloriesIn > 0) {
-                            totalProtein += d.proteinEaten;
-                            totalCarbs += d.carbsEaten;
-                            totalFat += d.fatEaten;
-                        }
+                        float totalProtein = 0, totalCarbs = 0, totalFat = 0;
+                        
+                        // Sử dụng initialWeight làm mốc bắt đầu nếu ngày đầu tiên trống
+                        float lastKnownWeight = (initialWeight > 0) ? initialWeight : userWeight;
+                        currentTargetKcal = 2500f;
 
-                        // Weight data
-                        if (d.weight > 0) {
-                            lastKnownWeight = d.weight;
+                        for (int i = 0; i < dateKeys.size(); i++) {
+                            DailySummaryData d = dataMap.get(dateKeys.get(i));
+                            
+                            if (d != null) {
+                                currentTargetKcal = d.targetCalories;
+                                float cal = d.totalCaloriesIn;
+                                currentBarEntries.add(new BarEntry(i, cal));
+                                
+                                if (d.totalCaloriesIn > 0) {
+                                    totalProtein += d.proteinEaten;
+                                    totalCarbs += d.carbsEaten;
+                                    totalFat += d.fatEaten;
+                                }
+
+                                // Cập nhật lastKnownWeight CHỈ khi ngày đó có dữ liệu thực tế
+                                if (d.weight > 0) {
+                                    lastKnownWeight = d.weight;
+                                }
+                            } else {
+                                currentBarEntries.add(new BarEntry(i, 0));
+                            }
+                            // Gán giá trị cân nặng (thực tế hoặc lan truyền từ quá khứ) cho ngày i
+                            weightEntries.add(new Entry(i, lastKnownWeight));
                         }
-                    } else {
-                        currentBarEntries.add(new BarEntry(i, 0));
+                        
+                        updateBarChart(currentBarEntries, labels, currentTargetKcal);
+                        updatePieChart(totalProtein, totalCarbs, totalFat);
+                        updateWeightChart(weightEntries, labels);
                     }
-                    weightEntries.add(new Entry(i, lastKnownWeight));
-                }
-                
-                updateBarChart(currentBarEntries, labels, currentTargetKcal);
-                updatePieChart(totalProtein, totalCarbs, totalFat);
-                updateWeightChart(weightEntries, labels);
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        if (isAdded()) Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
             public void onFailure(Exception e) {
-                if (isAdded()) {
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
+                // Nếu lỗi truy vấn lịch sử, vẫn tiếp tục fetch dải hiện tại
+                onSuccess(0f);
             }
         });
     }
@@ -343,7 +358,6 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         YAxis leftAxis = barChart.getAxisLeft();
         leftAxis.setAxisMinimum(0f);
         
-        // Điều chỉnh max tự động nhưng đảm bảo chứa được vạch target
         float maxVal = 0;
         if (barChart.getData() != null) {
             maxVal = barChart.getData().getYMax();
@@ -452,7 +466,7 @@ public class InsightsFragment extends Fragment implements OnChartValueSelectedLi
         
         float min = userWeight, max = userWeight;
         for (Entry e : entries) {
-            if (e.getY() < min) min = e.getY();
+            if (e.getY() < min && e.getY() > 0) min = e.getY();
             if (e.getY() > max) max = e.getY();
         }
         lineChart.getAxisLeft().setAxisMinimum(Math.max(0, min - 5f));

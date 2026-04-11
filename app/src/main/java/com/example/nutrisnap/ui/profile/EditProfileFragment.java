@@ -28,8 +28,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.FieldValue;
+import com.example.nutrisnap.controller.DailyController;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class EditProfileFragment extends Fragment {
@@ -40,12 +45,14 @@ public class EditProfileFragment extends Fragment {
     private FirebaseAuth mAuth;
     private String userId;
     private ListenerRegistration profileListener;
+    private DailyController dailyController;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        dailyController = new DailyController();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             userId = currentUser.getUid();
@@ -194,20 +201,46 @@ public class EditProfileFragment extends Fragment {
         updates.put("username", name);
         updates.put("phone", phone);
         
+        float weight = 0;
         try {
-            if (!weightStr.isEmpty()) updates.put("weight", Double.parseDouble(weightStr));
-            if (!heightStr.isEmpty()) updates.put("height", Double.parseDouble(heightStr));
+            if (!weightStr.isEmpty()) {
+                weight = Float.parseFloat(weightStr);
+                updates.put("weight", weight);
+            }
+            if (!heightStr.isEmpty()) updates.put("height", Float.parseFloat(heightStr));
         } catch (NumberFormatException e) {
-            updates.put("weight", weightStr);
-            updates.put("height", heightStr);
+            // Log error
         }
 
+        final float finalWeight = weight;
         db.collection("users").document(userId)
             .update(updates)
             .addOnSuccessListener(aVoid -> {
                 if (isAdded()) {
-                    Toast.makeText(getContext(), R.string.update_success, Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(requireView()).popBackStack();
+                    // Đồng bộ cân nặng vào daily_logs của ngày hiện tại
+                    if (finalWeight > 0) {
+                        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Calendar.getInstance().getTime());
+                        dailyController.updateWeight(userId, today, finalWeight, new DailyController.UpdateCallback() {
+                            @Override
+                            public void onSuccess() {
+                                if (isAdded()) {
+                                    Toast.makeText(getContext(), R.string.update_success, Toast.LENGTH_SHORT).show();
+                                    Navigation.findNavController(requireView()).popBackStack();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                if (isAdded()) {
+                                    Toast.makeText(getContext(), R.string.update_success, Toast.LENGTH_SHORT).show();
+                                    Navigation.findNavController(requireView()).popBackStack();
+                                }
+                            }
+                        });
+                    } else {
+                        Toast.makeText(getContext(), R.string.update_success, Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(requireView()).popBackStack();
+                    }
                 }
             })
             .addOnFailureListener(e -> {
