@@ -63,7 +63,7 @@ public class WeightFragment extends Fragment implements SetupProfileActivity.Set
                     if (!isKgSelected) {
                         weight = weight * 0.453592; // lbs to kg
                     }
-                    ((SetupProfileActivity) requireActivity()).updateUserField("currentWeight", weight);
+                    ((SetupProfileActivity) requireActivity()).updateUserField("weight", weight);
                 } catch (NumberFormatException e) {
                     // Ignore
                 }

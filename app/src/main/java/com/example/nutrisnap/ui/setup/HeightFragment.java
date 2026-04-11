@@ -61,7 +61,7 @@ public class HeightFragment extends Fragment implements SetupProfileActivity.Set
                 if (!isCmSelected) {
                     height = height * 30.48;
                 }
-                ((SetupProfileActivity) requireActivity()).updateUserField("currentHeight", height);
+                ((SetupProfileActivity) requireActivity()).updateUserField("height", height);
             } catch (NumberFormatException e) {
                 // Ignore
             }
